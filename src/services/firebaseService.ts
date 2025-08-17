@@ -56,7 +56,8 @@ export class FirebaseService<T> {
   }
 
   async getAll(): Promise<T[]> {
-    const q = query(collection(db, this.collectionName), orderBy('createdAt', 'desc'));
+    // const q = query(collection(db, this.collectionName), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, this.collectionName), orderBy('name', 'asc'));
     const querySnapshot = await getDocs(q);
     
     return querySnapshot.docs.map(doc => ({
