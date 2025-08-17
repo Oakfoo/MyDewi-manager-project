@@ -19,7 +19,7 @@ export function CharmList() {
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.description?.fr.toLowerCase().includes(searchTerm.toLowerCase());
+                         product.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !categoryFilter || product.categoryId === categoryFilter;
     return matchesSearch && matchesCategory;
   });
@@ -122,9 +122,9 @@ export function CharmList() {
                           {product.isActive ? 'Actif' : 'Inactif'}
                         </span>
                       </div>
-                      {product.description.fr && (
+                      {product.description && (
                         <p className="text-gray-600 text-sm mt-1 line-clamp-2">
-                          {product.description.fr}
+                          {product.description}
                         </p>
                       )}
                     </div>
