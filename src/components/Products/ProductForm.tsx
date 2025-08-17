@@ -24,7 +24,6 @@ export function ProductForm({ initialData, categories, onSubmit, onCancel }: Pro
     } : {
       images: [],
       isActive: true,
-      maxCharms: 5
     }
   });
 
