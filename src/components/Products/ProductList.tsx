@@ -1,5 +1,5 @@
 // import React, { useState, useEffect } from 'react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Product, CategoryProduct } from '../../types';
 import { useFirebaseCollection } from '../../hooks/useFirebaseCollection';
 import { Card, CardContent, CardHeader } from '../UI/Card';
@@ -18,7 +18,7 @@ export function ProductList() {
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.description?.fr.toLowerCase().includes(searchTerm.toLowerCase());
+                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !categoryFilter || product.categoryId === categoryFilter;
     return matchesSearch && matchesCategory;
   });
@@ -127,7 +127,7 @@ export function ProductList() {
                           {product.isActive ? 'Actif' : 'Inactif'}
                         </span>
                       </div>
-                      {product.description.fr && (
+                      {product.description && (
                         <p className="text-gray-600 text-sm mt-1 line-clamp-2">
                           {product.description}
                         </p>
