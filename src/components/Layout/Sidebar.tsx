@@ -8,7 +8,6 @@ import {
   Tags, 
   Sparkles,
   Gem,
-  Box,
   TrendingUp,
   LogOut
 } from 'lucide-react';
