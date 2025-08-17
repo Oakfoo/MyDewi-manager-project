@@ -248,10 +248,10 @@ export function StockManagement() {
                                 src={(item as Product).images[0]}
                                 alt={item.name}
                               />
-                            ) : (item as Charms).imageUrl ? (
+                            ) : (item as Charm).image ? (
                               <img
                                 className="h-10 w-10 rounded-lg object-cover"
-                                src={(item as Charms).imageUrl}
+                                src={(item as Charm).image}
                                 alt={item.name}
                               />
                             ) : (
