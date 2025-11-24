@@ -8,7 +8,7 @@ interface CardProps {
 
 export function Card({ children, className = '', hover = false }: CardProps) {
   return (
-    <div className={`bg-white rounded-xl shadow-sm border border-gray-100 ${hover ? 'hover:shadow-lg hover:-translate-y-1 transition-all duration-200' : ''} ${className}`}>
+    <div className={`rounded-xl shadow-md border outset border-gray-300 ${hover ? 'hover:shadow-lg hover:-translate-y-1 transition-all duration-200' : ''} ${className}`}>
       {children}
     </div>
   );
@@ -24,7 +24,7 @@ export function CardHeader({ children, className = '' }: { children: React.React
 
 export function CardContent({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`px-6 py-4 ${className}`}>
+    <div className={`px-2 py-2 md:px-6 md:py-4 ${className}`}>
       {children}
     </div>
   );
