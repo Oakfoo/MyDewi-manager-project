@@ -1,17 +1,18 @@
+import { Timestamp } from "firebase/firestore";
+
 export interface Customer {
   id?: string;
-  email: string;
   firstName: string;
   lastName: string;
-  phone?: string;
-  address?: {
-    street: string;
-    city: string;
-    postalCode: string;
-    country: string;
-  };
-  createdAt: Date;
-  updatedAt: Date;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  country: string;
+  createdAt: number;
+  updatedAt: number;
 }
 
 export interface CategoryProduct {
@@ -19,30 +20,36 @@ export interface CategoryProduct {
   name: {en: string, fr: string};
   description?: string;
   isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: number;
+  updatedAt: number;
 }
 
 export interface CharmCategory {
   id?: string;
   name: {en: string, fr: string};
   isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: number;
+  updatedAt: number;
 }
 
 export interface Charm {
   id?: string;
   name: string;
-  description: string;
   image?: string;
   price: number;
   categoryId: string;
   isActive: boolean;
-  stock: number;
-  minStock: number;
-  createdAt: Date;
-  updatedAt: Date;
+  stock: number | 0;
+  minStock: number | 0;
+  providerId: string;
+  providerRef: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface ProductDetail {
+  name: { en: string, fr: string};
+  values: string[];
 }
 
 export interface Product {
@@ -53,17 +60,31 @@ export interface Product {
   categoryId: string;
   images: string[];
   isActive: boolean;
+  stock: number | 0;
+  minStock: number | 0;
+  details: ProductDetail[];
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface Clasp {
+  id?: string;
+  isActive: boolean;
+  name: string;
+  image: string;
   stock: number;
   minStock: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: number;
+  updatedAt: number;
 }
 
 export interface Order {
   id?: string;
   customerId: string;
+  customerName: string;
   items: OrderItem[];
   totalAmount: number;
+  paymentStatus: "pending" | "succeeded" | "failed" | "canceled" | "cash";
   status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   shippingAddress: {
     street: string;
@@ -71,17 +92,45 @@ export interface Order {
     postalCode: string;
     country: string;
   };
-  createdAt: Date;
-  updatedAt: Date;
+  comment: string;
+  createdAt: number;
+  updatedAt: number;
 }
 
 export interface OrderItem {
   productId: string;
+  productQuantity: number;
   selectedCharms: CharmSelection[];
   totalPrice: number;
 }
 
+export interface MinimalOrderItem {
+  productId: string;
+  productName: string;
+  productImage: string;
+  productQuantity: number;
+  selectedCharms?: MinimalOrderItem[];
+}
+
 export interface CharmSelection {
   charmId: string;
-  quantity: number;
+  charmQuantity: number;
+}
+
+export interface PromoCode {
+  id?: string;
+  label: string;
+  deliveryFree:boolean;
+  reduction: number;
+  isActive: boolean;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
+export interface EventPromotion {
+  id?: string;
+  isActive: boolean;
+  pourcentage: number;
+  startDate: number;
+  endDate: number;
 }
