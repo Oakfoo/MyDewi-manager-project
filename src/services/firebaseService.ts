@@ -10,7 +10,8 @@ import {
   query, 
   orderBy, 
   where,
-  Timestamp
+  Timestamp,
+  OrderByDirection
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage } from '../config/firebase';
@@ -55,9 +56,8 @@ export class FirebaseService<T> {
     return null;
   }
 
-  async getAll(): Promise<T[]> {
-    // const q = query(collection(db, this.collectionName), orderBy('createdAt', 'desc'));
-    const q = query(collection(db, this.collectionName), orderBy('name', 'asc'));
+  async getAll(orderField: keyof T, orderDirection: string): Promise<T[]> {
+    const q = query(collection(db, this.collectionName), orderBy(String(orderField), orderDirection as OrderByDirection));
     const querySnapshot = await getDocs(q);
     
     return querySnapshot.docs.map(doc => ({
