@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import { Product, CategoryProduct } from '../../types';
 import { Button } from '../UI/Button';
 import { ImageService } from '../../services/firebaseService';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Plus } from 'lucide-react';
+import ProductDetailsForm from './components/ProductDetailsForm';
 
 interface ProductFormProps {
   initialData?: Product | null;
@@ -13,20 +14,35 @@ interface ProductFormProps {
 }
 
 export function ProductForm({ initialData, categories, onSubmit, onCancel }: ProductFormProps) {
-  const { register, handleSubmit, formState: { errors, isSubmitting }, watch } = useForm<Omit<Product, 'id'>>({
+  const { 
+    control,
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting }
+  } = useForm<Omit<Product, 'id'>>({
     defaultValues: initialData ? {
       name: initialData.name,
       description: initialData.description || '',
       basePrice: initialData.basePrice,
       categoryId: initialData.categoryId,
       isActive: initialData.isActive,
-      images: initialData.images || []
+      images: initialData.images || [],
+      details: initialData.details || [{name: {en: '', fr: ''}, values: ['']}],
     } : {
       images: [],
-      isActive: true,
+      isActive: true
     }
   });
-
+  
+  // FieldArray principal pour details[]
+  const {
+    fields: detailsFields,
+    append: appendDetail,
+    remove: removeDetail
+  } = useFieldArray({
+    control,
+    name: "details"
+  });
   const [uploadedImages, setUploadedImages] = useState<string[]>(initialData?.images || []);
   const [uploading, setUploading] = useState(false);
   const imageService = new ImageService();
@@ -60,63 +76,45 @@ export function ProductForm({ initialData, categories, onSubmit, onCancel }: Pro
       ...data,
       images: uploadedImages,
       basePrice: Number(data.basePrice),
-      createdAt: initialData?.createdAt || new Date(),
-      updatedAt: new Date(),
+      createdAt: initialData?.createdAt || new Date().getTime(),
+      updatedAt: new Date().getTime(),
     };
     await onSubmit(formattedData);
   };
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+      {initialData?.id && (
+        <div className='text-gray-400'>{initialData.id}</div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
+          {/* Nom du produit */}
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Nom du produit *
           </label>
-          <input
-            type="text"
+          <input type="text"
             {...register('name', { required: 'Le nom est requis' })}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           {errors.name && (
             <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
           )}
-        </div>
-
-        <div>
+          
+          {/* Description */}
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Prix de base (Francs XPF TTC) *
+            Description
           </label>
-          <input
-            type="number"
-            step="0.01"
-            {...register('basePrice', { required: 'Le prix est requis', min: 0 })}
+          <textarea {...register('description')}
+            rows={3}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-          {errors.basePrice && (
-            <p className="mt-1 text-sm text-red-600">{errors.basePrice.message}</p>
-          )}
-        </div>
-      </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Description
-        </label>
-        <textarea
-          {...register('description')}
-          rows={3}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
+          {/* Catégorie */}
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Catégorie *
           </label>
-          <select
-            {...register('categoryId', { required: 'La catégorie est requise' })}
+          <select {...register('categoryId', { required: 'La catégorie est requise' })}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="">Sélectionner une catégorie</option>
@@ -129,77 +127,108 @@ export function ProductForm({ initialData, categories, onSubmit, onCancel }: Pro
           {errors.categoryId && (
             <p className="mt-1 text-sm text-red-600">{errors.categoryId.message}</p>
           )}
-        </div>
-{/* 
-        <div>
+
+          {/* Prix du produit */}
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Nombre max de breloques *
+            Prix de base (Francs XPF TTC) *
           </label>
-          <input
-            type="number"
-            min="1"
-            max="20"
-            {...register('maxCharms', { required: 'Le nombre max de breloques est requis', min: 1, max: 20 })}
+          <input type="number"
+            step="0.01"
+            {...register('basePrice', { required: 'Le prix est requis', min: 0 })}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-          {errors.maxCharms && (
-            <p className="mt-1 text-sm text-red-600">{errors.maxCharms.message}</p>
+          {errors.basePrice && (
+            <p className="mt-1 text-sm text-red-600">{errors.basePrice.message}</p>
           )}
-        </div> */}
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Images du produit
-        </label>
-        <div className="space-y-4">
-          {uploadedImages.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {uploadedImages.map((url, index) => (
-                <div key={index} className="relative group">
-                  <img
-                    src={url}
-                    alt={`Image ${index + 1}`}
-                    className="w-full h-24 object-cover rounded-lg"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="flex items-center justify-center w-full">
-            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                {uploading ? (
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                ) : (
-                  <>
-                    <Upload className="w-8 h-8 mb-2 text-gray-500" />
-                    <p className="mb-2 text-sm text-gray-500">
-                      <span className="font-semibold">Cliquer pour uploader</span>
-                    </p>
-                    <p className="text-xs text-gray-500">PNG, JPG, JPEG (MAX. 10MB)</p>
-                  </>
-                )}
-              </div>
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-                disabled={uploading}
-              />
+        </div>
+        <div>
+          {/* Image du produit */}
+          <div id="images-container">
+            
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Images du produit
             </label>
+            <div className="space-y-4">
+            {uploadedImages.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {uploadedImages.map((url, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={url}
+                        alt={`Image ${index + 1}`}
+                        className="w-full h-24 object-cover rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex items-center justify-center w-full">
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    {uploading ? (
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    ) : (
+                      <>
+                        <Upload className="w-8 h-8 mb-2 text-gray-500" />
+                        <p className="mb-2 text-sm text-gray-500">
+                          <span className="font-semibold">Cliquer pour uploader</span>
+                        </p>
+                        <p className="text-xs text-gray-500">PNG, JPG, JPEG (MAX. 10MB)</p>
+                      </>
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    disabled={uploading}
+                  />
+                </label>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
+
+      <div id="details-container" className="mt-8">
+        <div className='flex gap-5'>
+          <label>Caractéristiques du produit</label>
+          <Button type="button" onClick={() => appendDetail(
+            {
+              name: {en: "", fr: ""},
+              values: []
+            }
+            )} className='mx-auto'
+          >
+            <Plus className='w-5 h-5'/>
+          </Button>
+        </div>
+        <div id="details-list" className='p-2 '>
+          {detailsFields.map((_detail, idDetail) => (
+            <ProductDetailsForm
+              key={`details-inputs-${idDetail}`}
+              control={control}
+              register={register}
+              index={idDetail}
+              remove={removeDetail}
+            />
+          ))}
+        </div>
+        
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
       </div>
 
       <div className="flex items-center">

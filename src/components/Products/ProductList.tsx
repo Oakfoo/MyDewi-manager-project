@@ -9,8 +9,8 @@ import { ProductForm } from './ProductForm';
 import { Plus, Edit, Trash2, Search, Package } from 'lucide-react';
 
 export function ProductList() {
-  const { data: products, loading, create, update, remove } = useFirebaseCollection<Product>('Products');
-  const { data: categories } = useFirebaseCollection<CategoryProduct>('ProductCategory');
+  const { data: products, loading, create, update, remove } = useFirebaseCollection<Product>('Products', "createdAt", "desc");
+  const { data: categories } = useFirebaseCollection<CategoryProduct>('ProductCategory', "name", "asc");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -56,12 +56,11 @@ export function ProductList() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="overflow-hidden space-y-6">
       {/* Header */ }
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestion des Produits</h1>
-          <p className="text-gray-600 mt-1">Gérez vos bracelets et colliers personnalisables</p>
+          <h1 className="text-3xl font-bold text-gray-900">Catalogue des Produits</h1>
         </div>
         <Button onClick={() => setIsModalOpen(true)} icon={Plus}>
           Nouveau Produit
@@ -95,86 +94,159 @@ export function ProductList() {
             </select>
           </div>
         </CardHeader>
-        {/* Liste des produits */ }
-        <CardContent className="p-0 overflow-y-scroll">
-          <div className="grid grid-cols-3 flex-1 gap-6 p-6">
-            {filteredProducts.map((product) => (
-              <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="aspect-w-16 aspect-h-9">
-                  {product.images.length > 0 ? (
-                    <img
-                      src={product.images[0]}
-                      alt={product.name}
-                      className="w-full h-48 object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
-                      <Package className="h-12 w-12 text-gray-400" />
-                    </div>
-                  )} 
+      
+      </Card>
+      
+      <div className='hidden md:grid grid-cols-3 gap-5'>
+        {filteredProducts.map((product) => (
+          <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow bg-white">
+            <div className="aspect-w-16 aspect-h-9">
+              {product.images.length > 0 ? (
+                <img
+                  src={product.images[0]}
+                  alt={product.name}
+                  className="w-full h-48 object-cover"
+                />
+              ) : (
+                <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
+                  <Package className="h-12 w-12 text-gray-400" />
                 </div>
-                
-                <CardContent>
-                  <div className="space-y-3">
-                    <div>
-                      <div className="flex items-start justify-between">
-                        <h3 className="font-semibold text-gray-900 text-lg">{product.name}</h3>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          product.isActive 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {product.isActive ? 'Actif' : 'Inactif'}
-                        </span>
-                      </div>
-                      {product.description && (
-                        <p className="text-gray-600 text-sm mt-1 line-clamp-2">
-                          {product.description}
-                        </p>
-                      )}
-                    </div>
+              )}
+            </div>
 
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-500">Prix de base:</span>
-                        <div className="flex items-center font-medium text-gray-900">
-                          { product.basePrice } FXPF
-                        </div>
-                      </div>
+            <CardContent>
+              <div className="space-y-3">
+                <div>
+                  <div className="flex items-start justify-between">
+                    <h3 className="font-semibold text-gray-900 text-lg">{product.name}</h3>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${product.isActive
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                      }`}>
+                      {product.isActive ? 'Actif' : 'Inactif'}
+                    </span>
+                  </div>
+                  {product.description && (
+                    <p className="text-gray-600 text-sm mt-1 line-clamp-2">
+                      {product.description}
+                    </p>
+                  )}
+                </div>
 
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-500">Catégorie:</span>
-                        <span className="font-medium">{getCategoryName(product.categoryId)}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex space-x-2 pt-3 border-t border-gray-100">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handleEdit(product)}
-                        icon={Edit}
-                        className="flex-1"
-                      >
-                        Modifier
-                      </Button>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => handleDelete(product.id!)}
-                        icon={Trash2}
-                        className="flex-1"
-                      >
-                        Supprimer
-                      </Button>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500">Prix de base:</span>
+                    <div className="flex items-center font-medium text-gray-900">
+                      {product.basePrice} XPF
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500">Catégorie:</span>
+                    <span className="font-medium">{getCategoryName(product.categoryId)}</span>
+                  </div>
+                </div>
+
+                <div className="flex space-x-2 pt-3 border-t border-gray-100">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleEdit(product)}
+                    icon={Edit}
+                    className="flex-1"
+                  >
+                    Modifier
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleDelete(product.id!)}
+                    icon={Trash2}
+                    className="flex-1"
+                  >
+                    Supprimer
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      
+
+      {/* Liste des Produits - Version Mobile */}      
+      {filteredProducts.map((product) => (
+        <Card key={`mobile-${product.id}`} className="md:hidden overflow-hidden hover:shadow-lg transition-shadow bg-white">
+          <div className="aspect-w-16 aspect-h-9">
+            {product.images.length > 0 ? (
+              <img
+                src={product.images[0]}
+                alt={product.name}
+                className="w-full h-48 object-cover"
+              />
+            ) : (
+              <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
+                <Package className="h-12 w-12 text-gray-400" />
+              </div>
+            )} 
           </div>
-        </CardContent>
-      </Card>
+          
+          <CardContent>
+            <div className="space-y-2">
+              <div>
+                <div className="flex items-start justify-between">
+                  <h3 className="font-semibold text-gray-900 text-lg">{product.name}</h3>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    product.isActive 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {product.isActive ? 'Actif' : 'Inactif'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <div className="text-sm">
+                  <span className="text-gray-500">Prix:</span>
+                  <span className='font-medium'>{ product.basePrice }F</span>
+                  {/* <div className="flex items-center font-medium text-gray-900">
+                    
+                  </div> */}
+                </div>
+
+                <div className="text-sm">
+                  <span className="text-gray-500">Catégorie:</span>
+                  <span className="font-medium">
+                    {getCategoryName(product.categoryId)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex space-x-2 pt-3 border-t border-gray-100">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => handleEdit(product)}
+                  icon={Edit}
+                  className="flex-1"
+                >
+                  Modifier
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => handleDelete(product.id!)}
+                  icon={Trash2}
+                  className="flex-1"
+                >
+                  Supprimer
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
       
       {/* Modal Création/Modification */ }
       <Modal
