@@ -10,7 +10,7 @@ import { CharmCategoryForm } from './CharmCategoryForm';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
 
 export function CharmCategoryList() {
-  const { data: categories, loading, create, update, remove } = useFirebaseCollection<CharmCategory>('CharmCategory');
+  const { data: categories, loading, create, update, remove } = useFirebaseCollection<CharmCategory>('CharmCategory', "name", "asc");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<CharmCategory | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
