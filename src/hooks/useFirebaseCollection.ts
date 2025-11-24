@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { FirebaseService } from '../services/firebaseService';
 import toast from 'react-hot-toast';
 
-export function useFirebaseCollection<T>(collectionName: string) {
+export function useFirebaseCollection<T>(collectionName: string, orderField: keyof T, orderDirection: string = "asc") {
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -13,7 +13,7 @@ export function useFirebaseCollection<T>(collectionName: string) {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const result = await service.getAll();
+      const result = await service.getAll(orderField, orderDirection);
       setData(result);
       setError(null);
     } catch (err) {
