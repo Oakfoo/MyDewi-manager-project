@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
@@ -9,29 +9,41 @@ import { ProductCategoryList } from './components/ProductCategories/ProductCateg
 import { CharmCategoryList } from './components/CharmsCategories/CharmCategoryList';
 import { CharmList } from './components/Charms/CharmList';
 import { StockManagement } from './components/Stocks/StockManagement';
+import { OrderList } from './components/Orders/OrderList';
+import { Configuration } from './components/Configurations/Configuration';
+import { PromoCodesList } from './components/PromoCodes/PromoCodesList';
+import { HomePage } from './components/Home/Home';
+import { SidebarProvider } from './contexts/SidebarContext';
+import { ClaspList } from './components/Clasps/ClaspList';
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <div className="min-h-screen bg-gray-50">
-          <ProtectedRoute>
-            <Routes>
-              <Route path="/" element={<Layout />}>
-                <Route index element={<Navigate to="/customers" replace />} />
-                <Route path="/customers" element={<CustomerList />} />
-                <Route path="/orders" element={<div className="text-center p-8">Section Commandes - En développement</div>} />
-                <Route path="/products" element={<ProductList />} />
-                <Route path="/product-categories" element={<ProductCategoryList />} />
-                <Route path="/charms" element={<CharmList />} />
-                <Route path="/charm-categories" element={<CharmCategoryList />} />
-                <Route path="/stocks" element={<StockManagement />} />
-              </Route>
-            </Routes>
-          </ProtectedRoute>
-          <Toaster position="top-right" />
-        </div>
-      </Router>
+      <SidebarProvider>
+        <Router>
+          <div className="min-h-screen">
+            <ProtectedRoute>
+              <Routes>
+                <Route path="/" element={<Layout />}>
+                  <Route index element={<HomePage />} />
+                  <Route path="/customers" element={<CustomerList />} />
+                  <Route path="/orders" element={<OrderList />} />
+                  <Route path="/products" element={<ProductList />} />
+                  <Route path="/product-categories" element={<ProductCategoryList />} />
+                  <Route path="/charms" element={<CharmList />} />
+                  <Route path="/charm-categories" element={<CharmCategoryList />} />
+                  <Route path="/clasps" element={<ClaspList />} />
+                  <Route path="/stocks" element={<StockManagement />} />
+                  <Route path="/promo-codes" element={<PromoCodesList />} />
+                  <Route path="/configuration" element={<Configuration />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Route>
+              </Routes>
+            </ProtectedRoute>
+            <Toaster position="top-right" />
+          </div>
+        </Router>
+      </SidebarProvider>
     </AuthProvider>
   );
 }
