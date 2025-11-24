@@ -1,4 +1,3 @@
-import React from 'react';
 import { useForm } from 'react-hook-form';
 import { Customer } from '../../types';
 import { Button } from '../UI/Button';
@@ -16,21 +15,30 @@ export function CustomerForm({ initialData, onSubmit, onCancel }: CustomerFormPr
       firstName: initialData.firstName,
       lastName: initialData.lastName,
       phone: initialData.phone || '',
-      address: initialData.address
+      address: initialData.address,
+      city: initialData.city,
+      postalCode: initialData.postalCode,
+      country: initialData.country,
+      createdAt: initialData.createdAt,
+      updatedAt: initialData.updatedAt
     } : undefined
   });
 
   const handleFormSubmit = async (data: Omit<Customer, 'id'>) => {
     const formattedData = {
       ...data,
-      createdAt: initialData?.createdAt || new Date(),
-      updatedAt: new Date(),
+      createdAt: initialData?.createdAt || new Date().getTime(),
+      updatedAt: new Date().getTime(),
     };
     await onSubmit(formattedData);
   };
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+      <div className="flex gap-5">
+        <label htmlFor="id-label">Identifiant : </label>
+        <input id="id-label" disabled={true} value={initialData?.id}></input>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -92,16 +100,15 @@ export function CustomerForm({ initialData, onSubmit, onCancel }: CustomerFormPr
         />
       </div>
 
+      {/* Adresse */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Adresse</h3>
-        
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Rue
+          Adresse
           </label>
           <input
             type="text"
-            {...register('address.street')}
+            {...register('address')}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
@@ -113,7 +120,7 @@ export function CustomerForm({ initialData, onSubmit, onCancel }: CustomerFormPr
             </label>
             <input
               type="text"
-              {...register('address.city')}
+              {...register('city')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -124,7 +131,7 @@ export function CustomerForm({ initialData, onSubmit, onCancel }: CustomerFormPr
             </label>
             <input
               type="text"
-              {...register('address.postalCode')}
+              {...register('postalCode')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -135,12 +142,13 @@ export function CustomerForm({ initialData, onSubmit, onCancel }: CustomerFormPr
             </label>
             <input
               type="text"
-              {...register('address.country')}
+              {...register('country')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
         </div>
-      </div>
+      </div> 
+     
 
       <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
         <Button variant="secondary" onClick={onCancel} type="button">
