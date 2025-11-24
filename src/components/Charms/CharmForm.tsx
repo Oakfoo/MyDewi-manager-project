@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { Charm, CharmCategory } from '../../types';
 import { Button } from '../UI/Button';
 import { ImageService } from '../../services/firebaseService';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 
 interface CharmFormProps {
   initialData?: Charm | null;
@@ -16,7 +16,6 @@ export function CharmForm({ initialData, categories, onSubmit, onCancel }: Charm
     const { register, handleSubmit, formState: { errors, isSubmitting }, watch } = useForm<Omit<Charm, 'id'>>({
         defaultValues: initialData ? {
           name: initialData.name,
-          description: initialData.description || '',
           price: initialData.price,
           categoryId: initialData.categoryId,
           isActive: initialData.isActive,
@@ -28,7 +27,7 @@ export function CharmForm({ initialData, categories, onSubmit, onCancel }: Charm
         }
     });
 
-    const [uploadedImages, setUploadedImages] = useState<string>(initialData?.image || '');
+    const [uploadedImage, setUploadedImage] = useState<string>(initialData?.image || '');
     const [uploading, setUploading] = useState(false);
     const imageService = new ImageService();
 
@@ -40,7 +39,7 @@ export function CharmForm({ initialData, categories, onSubmit, onCancel }: Charm
         try {
             const path = `images/charms/${Date.now()}_${files[0].name}`;
             const promise = await imageService.uploadImage(files[0], path);
-            setUploadedImages(promise);
+            setUploadedImage(promise);
         } catch (error) {
             console.error('Erreur lors de l\'upload:', error);
         } finally {
@@ -48,17 +47,18 @@ export function CharmForm({ initialData, categories, onSubmit, onCancel }: Charm
         }
     };
 
-    const removeImage = () => {
-        setUploadedImages(uploadedImages);
+    const removeImage = async () => {
+        await imageService.deleteImage(uploadedImage);
+        setUploadedImage('');
     };
 
     const handleFormSubmit = async (data: Omit<Charm, 'id'>) => {
         const formattedData = {
           ...data,
-          image: uploadedImages,
+          image: uploadedImage,
           price: Number(data.price),
-          createdAt: initialData?.createdAt || new Date(),
-          updatedAt: new Date(),
+          createdAt: initialData?.createdAt || new Date().getTime(),
+          updatedAt: new Date().getTime(),
         };
         await onSubmit(formattedData);
     };
@@ -66,9 +66,14 @@ export function CharmForm({ initialData, categories, onSubmit, onCancel }: Charm
     return (
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              ID Charme : {initialData?.id}
+            </label>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nom du produit *
+                Nom du charme *
               </label>
               <input
                 type="text"
@@ -82,7 +87,7 @@ export function CharmForm({ initialData, categories, onSubmit, onCancel }: Charm
     
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Prix de base (Francs XPF TTC) *
+                Prix (Francs XPF TTC) *
               </label>
               <input
                 type="number"
@@ -94,17 +99,6 @@ export function CharmForm({ initialData, categories, onSubmit, onCancel }: Charm
                 <p className="mt-1 text-sm text-red-600">{errors.price.message}</p>
               )}
             </div>
-          </div>
-    
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description
-            </label>
-            <textarea
-              {...register('description')}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
           </div>
     
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -131,16 +125,17 @@ export function CharmForm({ initialData, categories, onSubmit, onCancel }: Charm
     
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Images du produit
+              Image du produit
             </label>
             <div className="space-y-4">
-              {uploadedImages != '' && (
+
+              {uploadedImage && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className='relative group'>
+                    <div className='relative group '>
                         <img
-                            src={uploadedImages}
+                            src={uploadedImage}
                             alt={`Image choisie`}
-                            className="w-full h-24 object-cover rounded-lg"
+                            className="w-full object-contain rounded-lg"
                         />
                         <button
                             type="button"
@@ -150,7 +145,6 @@ export function CharmForm({ initialData, categories, onSubmit, onCancel }: Charm
                             <X className="h-3 w-3" />
                         </button>
                     </div>
-                    
                 </div>
               )}
     
@@ -175,7 +169,7 @@ export function CharmForm({ initialData, categories, onSubmit, onCancel }: Charm
                     accept="image/*"
                     onChange={handleImageUpload}
                     className="hidden"
-                    disabled={uploading || uploadedImages != ''}
+                    disabled={uploading || uploadedImage != ''}
                   />
                 </label>
               </div>

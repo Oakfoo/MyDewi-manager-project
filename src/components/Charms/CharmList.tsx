@@ -10,16 +10,15 @@ import { Plus, Edit, Trash2, Search} from 'lucide-react';
 import { CharmForm } from './CharmForm';
 
 export function CharmList() {
-  const { data: products, loading, create, update, remove } = useFirebaseCollection<Charm>('Charms');
-  const { data: categories } = useFirebaseCollection<CharmCategory>('CharmCategory');
+  const { data: products, loading, create, update, remove } = useFirebaseCollection<Charm>('Charms', "name", "asc");
+  const { data: categories } = useFirebaseCollection<CharmCategory>('CharmCategory', "createdAt", "desc");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Charm | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
 
   const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !categoryFilter || product.categoryId === categoryFilter;
     return matchesSearch && matchesCategory;
   });
@@ -61,8 +60,7 @@ export function CharmList() {
       {/* Header */ }
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestion des Breloques</h1>
-          <p className="text-gray-600 mt-1">Pour étoffer le catalogue et sa variété</p>
+          <h1 className="text-3xl font-bold text-gray-900">Catalogue des Charmes</h1>
         </div>
         <Button onClick={() => setIsModalOpen(true)} icon={Plus}>
           Nouvelle Breloque
@@ -97,7 +95,7 @@ export function CharmList() {
           </div>
         </CardHeader>
         {/* Liste des produits */ }
-        <CardContent className="p-0">
+        <CardContent className="p-0 overflow-y-auto min-h-80">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
             {filteredProducts.map((product) => (
               <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
@@ -105,7 +103,7 @@ export function CharmList() {
                     <img
                       src={product.image}
                       alt={product.name}
-                      className="w-full h-48 object-cover"
+                      className="w-full h-48 object-contain"
                     />
                 </div>
                 
@@ -122,18 +120,13 @@ export function CharmList() {
                           {product.isActive ? 'Actif' : 'Inactif'}
                         </span>
                       </div>
-                      {product.description && (
-                        <p className="text-gray-600 text-sm mt-1 line-clamp-2">
-                          {product.description}
-                        </p>
-                      )}
                     </div>
 
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-500">Prix de base:</span>
                         <div className="flex items-center font-medium text-gray-900">
-                            {product.price} FXPF
+                            {product.price} XPF
                         </div>
                       </div>
 
