@@ -10,7 +10,7 @@ import { ProductCategoryForm } from './ProductCategoryForm';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
 
 export function ProductCategoryList() {
-  const { data: categories, loading, create, update, remove } = useFirebaseCollection<CategoryProduct>('ProductCategory');
+  const { data: categories, loading, create, update, remove } = useFirebaseCollection<CategoryProduct>('ProductCategory', "createdAt", "desc");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<CategoryProduct | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
