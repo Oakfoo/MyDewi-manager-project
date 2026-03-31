@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { useFirebaseCollection } from "../../hooks/useFirebaseCollection";
 import { PromoCode } from "../../types";
 import { Modal } from "../UI/Modal";
 import { Card, CardContent, CardHeader } from "../UI/Card";
 import { Button } from "../UI/Button";
 import { Edit, Plus, Search, Trash2, Check, X } from "lucide-react";
 import { PromoCodeForm } from "./PromoCodeForm";
+import { promocodeService } from "../../services/data/PromoCodeService";
 
 export function PromoCodesList() {
-    const { data: codes, loading, create, update, remove } = useFirebaseCollection<PromoCode>('PromoCodes', 'label', 'asc');
+    const codes = promocodeService.getAll();
+    const [loading, setLoading] = useState<boolean>(promocodeService.getLoading())
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCode, setEditingCode] = useState<PromoCode | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -20,9 +21,9 @@ export function PromoCodesList() {
 
     const handleSubmit = async (data: Omit<PromoCode, 'id'>) => {
         if (editingCode) {
-          await update(editingCode.id!, data);
+          await promocodeService.update(editingCode.id!, data);
         } else {
-          await create(data);
+          await promocodeService.create(data);
         }
         setIsModalOpen(false);
         setEditingCode(null);
@@ -35,7 +36,9 @@ export function PromoCodesList() {
     
     const handleDelete = async (id: string) => {
         if (confirm('Êtes-vous sûr de vouloir supprimer ce code ?')) {
-            await remove(id);
+            setLoading(true);
+            await promocodeService.delete(id);
+            setLoading(false);
         }
     };
 
@@ -49,7 +52,7 @@ export function PromoCodesList() {
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Gestion des Codes Promos</h1>
+              <h1>Codes Promos</h1>
             </div>
             <Button onClick={() => setIsModalOpen(true)} icon={Plus}>
               Nouveau Code
@@ -105,7 +108,7 @@ export function PromoCodesList() {
                                           ? code.createdAt.toLocaleDateString('fr-FR')
                                           : new Date(code.createdAt).toLocaleDateString('fr-FR')
                                       } */}
-                                      {code.createdAt.toDate().toLocaleDateString('fr-FR')}
+                                      {new Date(code.createdAt).toLocaleDateString('fr-FR')}
                                   </td>
                                   <td className="px-2 py-4 whitespace-nowrap space-even text-sm font-medium space-x-2">
                                     <Button

@@ -4,6 +4,8 @@ import { useForm } from "react-hook-form";
 import { ImageService } from "../../services/firebaseService";
 import { Button } from "../UI/Button";
 import { X, Upload } from "lucide-react";
+import { Card } from "../UI/Card";
+import { matterService } from "../../services/data/MatterService";
 
 interface ClaspFormProps {
     initialData?: Clasp | null;
@@ -22,10 +24,12 @@ export function ClaspForm(
         control,
         register,
         handleSubmit,
-        formState: { errors, isSubmitting }
+        formState: { errors, isSubmitting },
+        watch
     } = useForm<Omit<Clasp, 'id'>>({
         defaultValues: initialData ? {
           name: initialData.name,
+          matterId: initialData.matterId,
           isActive: initialData.isActive,
           image: initialData.image || "",
         } : {
@@ -33,6 +37,8 @@ export function ClaspForm(
           isActive: true
         }
     });
+
+    const matters = matterService.getAll();
 
     const [uploadedImage, setUploadedImage] = useState<string>(initialData?.image || '');
     const [uploading, setUploading] = useState(false);
@@ -77,9 +83,10 @@ export function ClaspForm(
                     ID Charme : {initialData?.id}
                 </label>
             </div>
-            {/* Nom + Prix */}
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
+                    {/* Nom */}
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                         Nom du Fermoir *
                     </label>
@@ -91,8 +98,22 @@ export function ClaspForm(
                     {errors.name && (
                         <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
                     )}
+                    {/* Matière du fermoir */}
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Matière *
+                    </label>
+                    <select 
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        {...register("matterId", {required: "La matière du fermoir est requise"})}
+                    >
+                        {matters.map((matter, idMatter) => (
+                            <option key={"matter-" + idMatter} value={matter.id}>
+                                {matter.name.fr}
+                            </option>
+                        ))}
+                    </select>
                 </div>
-                {/* Active Item */}
+                {/* Fermoir actif */}
                 <div className="flex items-center">
                     <input
                         type="checkbox"
@@ -106,7 +127,7 @@ export function ClaspForm(
             </div>
 
             {/* Image + Upload*/}
-            <div>
+            <Card className="p-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                     Image du produit
                 </label>
@@ -123,7 +144,7 @@ export function ClaspForm(
                                 <button
                                     type="button"
                                     onClick={() => removeImage()}
-                                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                                 >
                                     <X className="h-3 w-3" />
                                 </button>
@@ -131,33 +152,35 @@ export function ClaspForm(
                         </div>
                     )}
 
-                    <div className="flex items-center justify-center w-full">
-                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                {uploading ? (
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                                ) : (
-                                    <>
-                                        <Upload className="w-8 h-8 mb-2 text-gray-500" />
-                                        <p className="mb-2 text-sm text-gray-500">
-                                            <span className="font-semibold">Cliquer pour uploader</span>
-                                        </p>
-                                        <p className="text-xs text-gray-500">PNG, JPG, JPEG (MAX. 10MB)</p>
-                                    </>
-                                )}
-                            </div>
-                            <input
-                                type="file"
-                                multiple
-                                accept="image/*"
-                                onChange={handleImageUpload}
-                                className="hidden"
-                                disabled={uploading || uploadedImage != ''}
-                            />
-                        </label>
-                    </div>
+                    {!uploadedImage && (
+                        <div className="flex items-center justify-center w-full">
+                            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    {uploading ? (
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                                    ) : (
+                                        <>
+                                            <Upload className="w-8 h-8 mb-2 text-gray-500" />
+                                            <p className="mb-2 text-sm text-gray-500">
+                                                <span className="font-semibold">Cliquer pour uploader</span>
+                                            </p>
+                                            <p className="text-xs text-gray-500">PNG, JPG, JPEG (MAX. 10MB)</p>
+                                        </>
+                                    )}
+                                </div>
+                                <input
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    onChange={handleImageUpload}
+                                    className="hidden"
+                                    disabled={uploading || uploadedImage != ''}
+                                />
+                            </label>
+                        </div>
+                    )}
                 </div>
-            </div>
+            </Card>
 
             
             

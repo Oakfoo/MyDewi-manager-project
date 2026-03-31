@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Charm, CharmCategory } from '../../types';
+import { Charm, CharmCategory, Matter } from '../../types';
 import { Button } from '../UI/Button';
 import { ImageService } from '../../services/firebaseService';
 import { Upload, X } from 'lucide-react';
@@ -8,16 +8,18 @@ import { Upload, X } from 'lucide-react';
 interface CharmFormProps {
   initialData?: Charm | null;
   categories: CharmCategory[];
+  matters: Matter[];
   onSubmit: (data: Omit<Charm, 'id'>) => Promise<void>;
   onCancel: () => void;
 }
 
-export function CharmForm({ initialData, categories, onSubmit, onCancel }: CharmFormProps) {
+export function CharmForm({ initialData, categories, matters, onSubmit, onCancel }: CharmFormProps) {
     const { register, handleSubmit, formState: { errors, isSubmitting }, watch } = useForm<Omit<Charm, 'id'>>({
         defaultValues: initialData ? {
           name: initialData.name,
           price: initialData.price,
-          categoryId: initialData.categoryId,
+          categoryId: initialData.categoryId || '',
+          matterId: initialData?.matterId || '',
           isActive: initialData.isActive,
           image: initialData.image || ''
         } : {
@@ -70,6 +72,16 @@ export function CharmForm({ initialData, categories, onSubmit, onCancel }: Charm
               ID Charme : {initialData?.id}
             </label>
           </div>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              {...register('isActive')}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label className="ml-2 block text-sm text-gray-900">
+              Produit actif
+            </label>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -101,7 +113,8 @@ export function CharmForm({ initialData, categories, onSubmit, onCancel }: Charm
             </div>
           </div>
     
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Catégorie */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Catégorie *
@@ -114,6 +127,26 @@ export function CharmForm({ initialData, categories, onSubmit, onCancel }: Charm
                 {categories.map(category => (
                   <option key={category.id} value={category.id}>
                     {category.name.fr}
+                  </option>
+                ))}
+              </select>
+              {errors.categoryId && (
+                <p className="mt-1 text-sm text-red-600">{errors.categoryId.message}</p>
+              )}
+            </div>
+            {/* Matière */}
+            <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+                Matière *
+              </label>
+              <select
+                {...register('matterId', { required: 'La matière est requise' })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Sélectionner une catégorie</option>
+                {matters.map(matter => (
+                  <option key={matter.id} value={matter.id}>
+                    {matter.name.fr}
                   </option>
                 ))}
               </select>
@@ -176,18 +209,9 @@ export function CharmForm({ initialData, categories, onSubmit, onCancel }: Charm
             </div>
           </div>
     
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              {...register('isActive')}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label className="ml-2 block text-sm text-gray-900">
-              Produit actif
-            </label>
-          </div>
+          
     
-          <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+          <div className="sticky bottom-0 bg-white left-0 flex justify-end space-x-4 pt-4 border-t border-gray-200">
             <Button variant="secondary" onClick={onCancel} type="button">
               Annuler
             </Button>

@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react';
-import { Plus, Edit, Trash2, Search, ZoomIn, Banknote } from 'lucide-react';
+import { Plus, Trash2, Search, ZoomIn, Banknote } from 'lucide-react';
 import { Button } from '../UI/Button';
 import { Modal } from '../UI/Modal';
 import { Card, CardContent, CardHeader } from '../UI/Card';
 import { OrderForm } from './OrderForm';
-import { Charm, Customer, MinimalOrderItem, Order, Product } from '../../types';
-import { useFirebaseCollection } from '../../hooks/useFirebaseCollection';
-import { SeeOrderDetails } from './SeeOrderDetails';
+import { Order } from '../../types';
+import { orderService } from '../../services/data/OrderService';
+import { customerService } from '../../services/data/CustomerService';
+import { OrderNavbar } from './order-components/order-navbar';
 
 //Liste de l'avancée d'une production d'une commande
 enum ProductionStatus {
@@ -21,6 +22,7 @@ enum ProductionStatus {
 //Liste des status d'un paiement de EpayNC
 enum PaymentStatus {
   pending = "En Attente",
+  pod = "à la Livraison",
   AUTHORISED = "Autorisé",
   AUTHORISED_TO_VALIDATE = "A Valider",
   ABANDONED = "Abandon",
@@ -30,22 +32,21 @@ enum PaymentStatus {
 
 enum PaymentStatusShort {
   pending = "--",
+  pod = "Livr.",
   AUTHORISED = "OK",
   AUTHORISED_TO_VALIDATE = "AV",
-  ABANDONED = "A",
-  REFUSED = "R",
-  CANCELLED = "C"
+  ABANDONED = "X",
+  REFUSED = "X",
+  CANCELLED = "X"
 }
 
 export function OrderList() {
-  const {data: orders, loading, create, update, remove} = useFirebaseCollection<Order>('Orders', "createdAt", "desc");
-  const {data: customers, loading: customerLoading} = useFirebaseCollection<Customer>("Customers", "createdAt", "asc");
-  const {data: products, loading: productLoading} = useFirebaseCollection<Product>("Products", "createdAt", "asc");
-  const {data: charms, loading: charmLoading} = useFirebaseCollection<Charm>("Charms", "createdAt", "asc");
+  const orders = orderService.getAll();
+  const customers = customerService.getAll();
+  const [loading, setLoading] = useState<boolean>(orderService.getLoading());
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
-  const [minimalOrderItems, setMinimalOrderItems] = useState<MinimalOrderItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [paymentStatusFilter, setPaymentStatusFilter] = useState('');
@@ -77,7 +78,6 @@ export function OrderList() {
 
   const handleOpenDetails = (order: Order) => {
     setEditingOrder(order);
-    getMinimalOrderItems(order);
     setIsDetailsOpen(true);
   }
 
@@ -86,56 +86,27 @@ export function OrderList() {
     setIsDetailsOpen(false);
   }
 
-  const getMinimalOrderItems = (order: Order) => {
-    const productIds: string[] = [];
-    const charmIds: string[][] = [];
-    const minimalOrderItems: MinimalOrderItem[] = [];
-    order.items.map(item => {
-      productIds.push(item.productId);
-      charmIds.push(item.selectedCharms.map(charm => charm.charmId));
-    });
-    productIds.forEach((productId, productIndex) => {
-      const productData = products.find(product => product.id === productId);
-      const charmsData = charms.filter(charm => charmIds[productIndex].includes(charm.id!));
-
-      minimalOrderItems.push({
-        productId: productId,
-        productName: productData?.name ? productData.name : '',
-        productImage: productData?.images[0] ? productData.images[0] : '',
-        productQuantity: order.items[productIndex].productQuantity,
-        selectedCharms: charmsData.map((charm, charmIndex) => ({
-          productId: charm.id!,
-          productName: charm.name,
-          productImage: charm.image ? charm.image : '',
-          productQuantity: order.items[productIndex].selectedCharms[charmIndex].charmQuantity,
-        })),
-      });
-    });
-    setMinimalOrderItems(minimalOrderItems);
-  }
-
   const handleSubmit = async (data: Omit<Order, 'id'>) => {
+    setLoading(true);
     if (editingOrder) {
-      await update(editingOrder.id!, data);
+      await orderService.update(editingOrder.id!, data);
     } else {
-      await create(data);
+      await orderService.create(data);
     }
     setIsFormOpen(false);
     setEditingOrder(null);
-  };
-
-  const handleEdit = (order: Order) => {
-    setEditingOrder(order);
-    setIsFormOpen(true);
+    setLoading(false);
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) {
-      await remove(id);
+    if (confirm('Êtes-vous sûr de vouloir supprimer la commande ?')) {
+      setLoading(true);
+      await orderService.delete(id);
+      setLoading(false);
     }
   };
 
-  if (loading || customerLoading || productLoading || charmLoading) {
+  if (loading) {
     return <div className="flex justify-center items-center h-64">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
     </div>;
@@ -192,9 +163,9 @@ export function OrderList() {
     <div className="space-y-6">
       <div className="flex justify-between items-center gap-2">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestion des Commandes</h1>
+          <h1>Gestion des Commandes</h1>
         </div>
-        <div className='flex gap-2'>
+        <div className='flex gap-2 overflow-x-auto'>
           <Button color='success' size="sm" onClick={() => openEpayNC()} icon={Banknote}>
             EpayNC
           </Button>
@@ -204,7 +175,8 @@ export function OrderList() {
         </div>
         
       </div>
-      <Card>
+      {/* Recherche */}
+      <Card className='p-2'>
         <CardHeader className='flex flex-col md:flex-row gap-4'>
           <div className='flex flex-col gap-1 w-full'>
             <label htmlFor='search' className='text-sm'>Rechercher</label>
@@ -221,7 +193,7 @@ export function OrderList() {
             </div>
           </div>
           {/* Barre de filtres des status */}
-          <div className='flex space-x-2'>
+          <div>
             {/* Status production */}
             {/* <div className='flex flex-col gap-1'>
               <label htmlFor='status' className='text-sm'>Statut</label>
@@ -246,7 +218,7 @@ export function OrderList() {
                 id='paymentStatus'
                 value={paymentStatusFilter}
                 onChange={(e) => setPaymentStatusFilter(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Tous les statuts de paiement</option>
                 <option key={`payment-waiting`} value="AUTHORISED_TO_VALIDATE">
@@ -267,91 +239,36 @@ export function OrderList() {
               </select>
             </div>
           </div>
-          
-          
-          
         </CardHeader>
-        <CardContent className='bg-gray-200'>
-          {/* Vue Ordinateur */}
-          <div className="hidden md:block overflow-x-auto">
-              <table className="w-full">
-                  <thead className="bg-gray-50">
-                      <tr className='divide-x divide-gray-200'>
-                          {/* <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th> */}
-                          <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-                          <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Montant</th>
-                          <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-                          <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Créé le</th>
-                          <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                      </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                      {filteredOrders.map((order) => (
-                          <tr key={order.id} className="hover:bg-gray-50 transition-colors text-center">
-                              {/* <td className="px-4 py-4 whitespace-nowrap">
-                                  {order.id}
-                              </td> */}
-                              <td className="px-4 py-4 whitespace-nowrap">
-                                  {GetCustomerName(order.customerId)}
-                              </td>
-                              <td className="px-2 py-2 whitespace-nowrap">
-                                  {GetPaymentStatus(order.totalAmount, order.paymentStatus)}
-                              </td>
-                              <td className="px-4 py-4 whitespace-nowrap">
-                                  {GetStatusIcons(order.status)}
-                              </td>
-                              <td className="px-4 py-4 whitespace-nowrap">
-                                {new Date(order.createdAt).toLocaleDateString('fr-FR')}
-                              </td>
-                              {/* <td className="px-6 py-4 whitespace-nowrap">
-                                  {order.updatedAt && new Date(order.updatedAt).toLocaleDateString('fr-FR')}
-                              </td> */}
-                              <td className="px-6 py-4 whitespace-nowrap space-x-5 space-evenly">
-                                <Button variant="primary" size="sm" icon={ZoomIn} onClick={() => handleOpenDetails(order)}>Voir</Button>
-                                {/* <Button variant="secondary" size="sm" icon={Edit} onClick={() => handleEdit(order)}>Modifier</Button> */}
-                                <Button variant="danger" size="sm" icon={Trash2} onClick={() => handleDelete(order.id!)}>Supprimer</Button>
-                              </td>
-                          </tr>
-                      ))}
-                  </tbody>
-              </table>
-          </div>
-          {/* Vue Mobile */}
-          <div className="md:hidden">
-            {filteredOrders.map((order: any) => (
-              <Card key={order.id} className='mb-3'>
-                <CardHeader className='flex'>
-                  <div className='flex flex-col w-full gap-2'>
-                    <label className='text-sm'>Client : {GetCustomerName(order.customerId)}</label>
-                    <label className='text-sm'>Créé le: {new Date(order.createdAt).toLocaleDateString('fr-FR')}</label>
-                  </div>
-                  <div className='float-right'>
-                    <Button variant="danger" size="sm" onClick={() => handleDelete(order.id!)}>
-                      <Trash2 />
-                    </Button>
-                  </div>
-                  
-                </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-4">
-                  <div className='flex flex-col gap-1'>
-                    <label className='text-sm'>Montant: {GetPaymentStatus(order.totalAmount, order.paymentStatus)}</label>
-                    <label className='text-sm'>Statut: {GetStatusIcons(order.status)}</label>
-                  </div>
-                  <div className='flex flex-col gap-1'>
-                    <Button variant="primary" size="sm" icon={ZoomIn} onClick={() => handleOpenDetails(order)}>Voir</Button>
-                    {/* <Button className='flex-1' variant="secondary" size="sm" onClick={() => handleEdit(order)}>
-                        <Edit className='w-8 h-8' />
-                      </Button> */}
-                  </div>
-                </CardContent>
-                
-              </Card>
-            ))}
-          </div>
-        </CardContent>
       </Card>
 
-      {/* Modal Création/Modification */ }
+      {/* Liste des commandes */}
+      {filteredOrders.map((order: any) => (
+        <Card key={order.id} className='p-2 bg-white'>
+          <CardHeader className='flex'>
+            <div className='w-full'>
+              <p className='text-sm'>Client : {GetCustomerName(order.customerId)}</p>
+              <p className='text-sm'>Créé le: {new Date(order.createdAt).toLocaleDateString('fr-FR')}</p>
+            </div>
+            {/* Bouton supprimer commande */}
+            {/* <div className='float-right'>
+              <Button title="Supprimer la commande" variant="danger" size="sm" onClick={() => handleDelete(order.id!)}>
+                <Trash2 className='w-5 h-5'/>
+              </Button>
+            </div> */}
+
+          </CardHeader>
+          <CardContent className="space-y-4 flex flex-col md:flex-row gap-4">
+            <div className='flex gap-1 md:flex-row gap-4 w-full'>
+              <label className='text-sm'>Montant: {GetPaymentStatus(order.totalAmount ? order.totalAmount : order?.finalPrice, order.paymentStatus)}</label>
+              {/* <label className='text-sm'>Statut: {GetStatusIcons(order.status)}</label> */}
+            </div>
+            <Button disabled={order.totalAmount} variant="primary" size="sm" icon={ZoomIn} onClick={() => handleOpenDetails(order)}>Voir</Button>
+          </CardContent>
+        </Card>
+      ))}
+
+      {/* Modal Création/Modification */}
       <Modal
         isOpen={isFormOpen}
         onClose={() => {
@@ -379,12 +296,9 @@ export function OrderList() {
         title="Détails de la commande"
         size="lg"
       >
-        <div>
-          <SeeOrderDetails 
-            data={minimalOrderItems}
-            comment={editingOrder ? editingOrder.comment : ''}
-          />
-        </div>
+        <OrderNavbar 
+          selectedOrder={editingOrder!}
+        />
       </Modal>
     </div>
   );

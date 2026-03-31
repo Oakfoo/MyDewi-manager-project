@@ -1,10 +1,9 @@
 import { useForm } from "react-hook-form";
 import { Charm, Customer, Order, Product } from "../../types";
-import { useFirebaseCollection } from "../../hooks/useFirebaseCollection";
 import { Button } from "../UI/Button";
 import { useState } from "react";
-import { FirebaseService } from "../../services/firebaseService";
 import { Card } from "../UI/Card";
+import { customerService } from "../../services/data/CustomerService";
 
 interface OrderFormProps {
   initialData?: Order | null;
@@ -13,10 +12,8 @@ interface OrderFormProps {
 }
 
 export function OrderForm({ initialData, onSubmit, onCancel }: OrderFormProps) {
-  const customerService = new FirebaseService<Customer>("Customers");
-  const productService = new FirebaseService<Product>("Products");
-  const charmService = new FirebaseService<Charm>("Charms");
-  const [customer, setCustomer] = useState<Customer | null>(null);
+  const [customer, setCustomer] = useState<Customer >(customerService.getById(initialData?.customerId!)!)
+  
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<Order>({
     defaultValues: initialData ? {
       id: initialData?.id,

@@ -4,13 +4,13 @@ import { getStorage } from 'firebase/storage';
 import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB74qhuHAzo-CozaoF5j2dXI7ldZzDC0JU",
-  authDomain: "my-dewi-shop-nc.firebaseapp.com",
-  projectId: "my-dewi-shop-nc",
-  storageBucket: "my-dewi-shop-nc.firebasestorage.app",
-  messagingSenderId: "336216013917",
-  appId: "1:336216013917:web:fe2bf267d216d43f6961b4",
-  measurementId: "G-D44HKQ9ELF"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase

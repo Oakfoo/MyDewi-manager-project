@@ -1,3 +1,108 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+h1, h2, h3, h4, h5 {
+    font-weight:bolder;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 2px 0;
+}
+
+.navLink {
+    display: flex;
+    justify-items: center;
+    align-items: center;
+    transition: all 0.3s;
+    padding: 3px 4px;
+    font-size: medium;
+    border-radius: 8px;
+}
+
+@media (width < 460px) {
+    h1 {
+        font-size: 5vw;
+    }
+
+    h2 {
+        font-size: 4.5vw;
+    }
+
+    h3 {
+        font-size: 4.2vw;
+    }
+
+    h4 {
+        font-size: 3.9vw;
+    }
+
+    h5 {
+        font-size: 3.5vw;
+    }
+    
+    nav {
+        > div {
+            > h4 {
+                border-radius: 50px;
+                font-size: 3vw;
+                color: white;
+                background: linear-gradient(to right, rgb(169, 169, 243), rgb(138, 118, 252));
+            }
+
+            .navLink.activeLink {
+                text-align: right;
+                color: white;
+                background: linear-gradient(to right, rgb(96, 99, 255), rgb(145, 170, 250));
+            }
+
+            .navLink.inactiveLink {
+                text-align: left;
+                color: rgb(71, 71, 71);
+            }
+        }
+    }
+}
+
+@media (width >= 460px) {
+    h1 {
+        font-size: 1vw;
+    }
+
+    h2 {
+        font-size: 0.75vw;
+    }
+
+    h3 {
+        font-size: 0.6vw;
+    }
+
+    h4 {
+        font-size: 0.45vw;
+    }
+
+    h5 {
+        font-size: 0.3vw;
+    }
+
+    nav {
+        div {
+            h4 {
+                border-radius: 50px;
+                font-size: 0.8vw;
+                color: white;
+                background: linear-gradient(to right, rgb(169, 169, 243), rgb(138, 118, 252));
+            }
+
+            .navLink.activeLink {
+                text-align: right;
+                color: white;
+                background: linear-gradient(to right, rgb(96, 99, 255), rgb(145, 170, 250));
+            }
+
+            .navLink.inactiveLink {
+                text-align: left;
+                color: rgb(71, 71, 71);
+            }
+        }
+    }
+}

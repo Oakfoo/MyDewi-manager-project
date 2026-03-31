@@ -1,5 +1,3 @@
-import { Timestamp } from "firebase/firestore";
-
 export interface Customer {
   id?: string;
   firstName: string;
@@ -17,15 +15,23 @@ export interface Customer {
 
 export interface CategoryProduct {
   id?: string;
+  displayOrder: number;
   name: {en: string, fr: string};
   description?: string;
   isActive: boolean;
+  properties: {
+    useClasp: boolean,
+    useCharms: boolean,
+    minAmountCharm: number,
+    canBeMixed: boolean,
+  }
   createdAt: number;
   updatedAt: number;
 }
 
 export interface CharmCategory {
   id?: string;
+  displayOrder: number;
   name: {en: string, fr: string};
   isActive: boolean;
   createdAt: number;
@@ -38,6 +44,7 @@ export interface Charm {
   image?: string;
   price: number;
   categoryId: string;
+  matterId: string;
   isActive: boolean;
   stock: number | 0;
   minStock: number | 0;
@@ -52,11 +59,17 @@ export interface ProductDetail {
   values: string[];
 }
 
+export interface ProductDetailSelection {
+  id: number;
+  idValue: number;
+}
+
 export interface Product {
   id?: string;
   name: string;
   description: string;
   basePrice: number;
+  matterId: string;
   categoryId: string;
   images: string[];
   isActive: boolean;
@@ -72,6 +85,7 @@ export interface Clasp {
   isActive: boolean;
   name: string;
   image: string;
+  matterId: string;
   stock: number;
   minStock: number;
   createdAt: number;
@@ -83,11 +97,11 @@ export interface Order {
   customerId: string;
   customerName: string;
   items: OrderItem[];
-  totalAmount: number;
-  paymentStatus: "pending" | "succeeded" | "failed" | "canceled" | "cash";
+  
+  paymentStatus: "pending" | "succeeded" | "failed" | "canceled" | "pod";
   status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   shippingAddress: {
-    street: string;
+    address: string;
     city: string;
     postalCode: string;
     country: string;
@@ -95,21 +109,24 @@ export interface Order {
   comment: string;
   createdAt: number;
   updatedAt: number;
+
+  //Gestion des prix
+  productPrice: number;
+  totalAmount: number;
+  finalPrice: number;
+
+  // Gestion des frais et réductions
+  deliveryPrice: number;
+  reduction: number;
 }
 
 export interface OrderItem {
-  productId: string;
+  productIds: string[];
   productQuantity: number;
+  productDetailsSelection?: ProductDetailSelection[];
   selectedCharms: CharmSelection[];
+  selectedClasp?: string;
   totalPrice: number;
-}
-
-export interface MinimalOrderItem {
-  productId: string;
-  productName: string;
-  productImage: string;
-  productQuantity: number;
-  selectedCharms?: MinimalOrderItem[];
 }
 
 export interface CharmSelection {
@@ -122,15 +139,47 @@ export interface PromoCode {
   label: string;
   deliveryFree:boolean;
   reduction: number;
+  pourcentage: boolean;
   isActive: boolean;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: number;
+  updatedAt: number;
 }
 
 export interface EventPromotion {
   id?: string;
+  label: {fr: string, en: string};
   isActive: boolean;
-  pourcentage: number;
-  startDate: number;
-  endDate: number;
+  value: number;
+  appliedOnProducts: boolean;
+  promotedCategories: string[];
+  appliedOnFinalProduct: boolean;
+  pourcentage: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface Schedule {
+  id?: string;
+  // Détails Client
+  name: string;
+  tel: string;
+  email: string;
+  // Détails rdv
+  date: number;
+  startHour: string;
+  endHour: string;
+  type: string;
+  // Status Rdv
+  isConfirmed: boolean;
+  isActive: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface Matter {
+  id?: string;
+  name: {en: string, fr: string};
+  isActive: boolean;
+  createdAt: number;
+  updatedAt: number;
 }

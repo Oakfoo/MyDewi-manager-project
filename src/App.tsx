@@ -11,10 +11,12 @@ import { CharmList } from './components/Charms/CharmList';
 import { StockManagement } from './components/Stocks/StockManagement';
 import { OrderList } from './components/Orders/OrderList';
 import { Configuration } from './components/Configurations/Configuration';
-import { PromoCodesList } from './components/PromoCodes/PromoCodesList';
 import { HomePage } from './components/Home/Home';
 import { SidebarProvider } from './contexts/SidebarContext';
 import { ClaspList } from './components/Clasps/ClaspList';
+import { PromotionPage } from './components/Promotions/promotionsPage';
+import { ScheduleList } from './components/Schedule/ScheduleList';
+import { MatterList } from './components/Matters/MatterList';
 
 function App() {
   return (
@@ -25,16 +27,18 @@ function App() {
             <ProtectedRoute>
               <Routes>
                 <Route path="/" element={<Layout />}>
-                  <Route index element={<HomePage />} />
+                  <Route index element={<OrderList />} />
                   <Route path="/customers" element={<CustomerList />} />
                   <Route path="/orders" element={<OrderList />} />
-                  <Route path="/products" element={<ProductList />} />
-                  <Route path="/product-categories" element={<ProductCategoryList />} />
-                  <Route path="/charms" element={<CharmList />} />
-                  <Route path="/charm-categories" element={<CharmCategoryList />} />
-                  <Route path="/clasps" element={<ClaspList />} />
+                  <Route path="/agenda" element={<ScheduleList />} />
                   <Route path="/stocks" element={<StockManagement />} />
-                  <Route path="/promo-codes" element={<PromoCodesList />} />
+                  <Route path="/promotions" element={<PromotionPage />} />
+                  <Route path="/products" element={<ProductList />} />
+                  <Route path="/clasps" element={<ClaspList />} />
+                  <Route path="/charms" element={<CharmList />} />
+                  <Route path="/product-categories" element={<ProductCategoryList />} />
+                  <Route path="/charm-categories" element={<CharmCategoryList />} />
+                  <Route path="/matters" element={<MatterList />} />
                   <Route path="/configuration" element={<Configuration />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Route>

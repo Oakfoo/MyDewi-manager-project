@@ -1,33 +1,37 @@
 // import React, { useState, useEffect } from 'react';
 import { useState } from 'react';
 import { CategoryProduct } from '../../types';
-import { useFirebaseCollection } from '../../hooks/useFirebaseCollection';
 import { Card, CardContent, CardHeader } from '../UI/Card';
 import { Button } from '../UI/Button';
 import { Modal } from '../UI/Modal';
 import { ProductCategoryForm } from './ProductCategoryForm';
 // import { Plus, Edit, Trash2, Search, Package, Euro } from 'lucide-react';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
+import { productCategoryService } from '../../services/data/ProductCategoryService';
 
 export function ProductCategoryList() {
-  const { data: categories, loading, create, update, remove } = useFirebaseCollection<CategoryProduct>('ProductCategory', "createdAt", "desc");
+  const categories = productCategoryService.getAll("displayOrder");
+  const [loading, setLoading] = useState<boolean>(productCategoryService.getLoading());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<CategoryProduct | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredCategories = categories.filter(cat => {
-    const matchesSearch = cat.name.fr.toLowerCase().includes(searchTerm.toLowerCase())
-    return matchesSearch;
+    const matches = cat.name.fr.toLowerCase().includes(searchTerm.toLowerCase())
+                    || cat.name.en.toLowerCase().includes(searchTerm.toLowerCase());
+    return matches;
   });
 
   const handleSubmit = async (data: Omit<CategoryProduct, 'id'>) => {
+    setLoading(true);
     if (editingCategory) {
-      await update(editingCategory.id!, data);
+      await productCategoryService.update(editingCategory.id!, data);
     } else {
-      await create(data);
+      await productCategoryService.create(data);
     }
     setIsModalOpen(false);
     setEditingCategory(null);
+    setLoading(false);
   };
 
   const handleEdit = (category: CategoryProduct) => {
@@ -36,8 +40,10 @@ export function ProductCategoryList() {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-      await remove(id);
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) {
+      setLoading(true);
+      await productCategoryService.delete(id);
+      setLoading(false);
     }
   };
 
@@ -52,8 +58,7 @@ export function ProductCategoryList() {
       {/* Header */ }
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestion des Produits</h1>
-          <p className="text-gray-600 mt-1">Gérez vos bracelets et colliers personnalisables</p>
+          <h1>Catégories de produits</h1>
         </div>
         <Button onClick={() => setIsModalOpen(true)} icon={Plus}>
           Nouvelle catégorie
@@ -67,7 +72,7 @@ export function ProductCategoryList() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <input
                 type="text"
-                placeholder="Rechercher un produit..."
+                placeholder="Rechercher une catégorie..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -75,53 +80,50 @@ export function ProductCategoryList() {
             </div>
           </div>
         </CardHeader>
-        {/* Liste des produits */ }
-        <CardContent className="p-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-            {filteredCategories.map((category) => (
-              <Card key={category.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <CardContent>
-                  <div className="space-y-3">
-                    <div>
-                      <div className="flex items-start justify-between">
-                        <h3 className="font-semibold text-gray-900 text-lg">{category.name.fr}</h3>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          category.isActive 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {category.isActive ? 'Actif' : 'Inactif'}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex space-x-2 pt-3 border-t border-gray-100">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handleEdit(category)}
-                        icon={Edit}
-                        className="flex-1"
-                      >
-                        Modifier
-                      </Button>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => handleDelete(category.id!)}
-                        icon={Trash2}
-                        className="flex-1"
-                      >
-                        Supprimer
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </CardContent>
       </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 p-2 md:p-5">
+        {filteredCategories.map((category) => (
+          <Card key={category.id} className="p-2 bg-white overflow-hidden hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  {category.displayOrder ? category.displayOrder : "?"}
+                </span>
+                <h3 className="font-semibold text-gray-900 text-lg">{category.name.fr}</h3>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${category.isActive
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-red-100 text-red-800'
+                  }`}>
+                  {category.isActive ? 'Actif' : 'Inactif'}
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="flex space-x-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => handleEdit(category)}
+                  icon={Edit}
+                  className="flex-1"
+                >
+                  Modifier
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => handleDelete(category.id!)}
+                  icon={Trash2}
+                  className="flex-1"
+                >
+                  Supprimer
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
       
       {/* Modal Création/Modification */ }
       <Modal
@@ -130,7 +132,7 @@ export function ProductCategoryList() {
           setIsModalOpen(false);
           setEditingCategory(null);
         }}
-        title={editingCategory ? 'Modifier le produit' : 'Nouveau produit'}
+        title={editingCategory ? 'Modifier la catégorie' : 'Nouvelle catégorie'}
         size="xl"
       >
         <ProductCategoryForm

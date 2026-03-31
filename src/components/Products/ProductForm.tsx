@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
-import { Product, CategoryProduct } from '../../types';
+import { Product } from '../../types';
 import { Button } from '../UI/Button';
 import { ImageService } from '../../services/firebaseService';
 import { Upload, X, Plus } from 'lucide-react';
 import ProductDetailsForm from './components/ProductDetailsForm';
+import { matterService } from '../../services/data/MatterService';
+import { productCategoryService } from '../../services/data/ProductCategoryService';
 
 interface ProductFormProps {
   initialData?: Product | null;
-  categories: CategoryProduct[];
   onSubmit: (data: Omit<Product, 'id'>) => Promise<void>;
   onCancel: () => void;
 }
 
-export function ProductForm({ initialData, categories, onSubmit, onCancel }: ProductFormProps) {
+export function ProductForm({ initialData, onSubmit, onCancel }: ProductFormProps) {
   const { 
     control,
     register,
@@ -24,6 +25,7 @@ export function ProductForm({ initialData, categories, onSubmit, onCancel }: Pro
       name: initialData.name,
       description: initialData.description || '',
       basePrice: initialData.basePrice,
+      matterId: initialData.matterId || "",
       categoryId: initialData.categoryId,
       isActive: initialData.isActive,
       images: initialData.images || [],
@@ -33,7 +35,9 @@ export function ProductForm({ initialData, categories, onSubmit, onCancel }: Pro
       isActive: true
     }
   });
-  
+
+  const categories = productCategoryService.getAll();
+  const matters = matterService.getAll();
   // FieldArray principal pour details[]
   const {
     fields: detailsFields,
@@ -140,6 +144,20 @@ export function ProductForm({ initialData, categories, onSubmit, onCancel }: Pro
           {errors.basePrice && (
             <p className="mt-1 text-sm text-red-600">{errors.basePrice.message}</p>
           )}
+
+          {/* Matière du produit */}
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Matière du produit *
+          </label>
+          <select
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            {...register("matterId", {required: "La matière du produit est à préciser"})}
+          >
+            { matters.map((matter, idMatter) => (
+                <option key={"matter-" + idMatter} value={matter.id}>{matter.name.fr}</option>
+              ))
+            }
+          </select>
         </div>
         <div>
           {/* Image du produit */}
@@ -149,7 +167,7 @@ export function ProductForm({ initialData, categories, onSubmit, onCancel }: Pro
               Images du produit
             </label>
             <div className="space-y-4">
-            {uploadedImages.length > 0 && (
+              {uploadedImages.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {uploadedImages.map((url, index) => (
                     <div key={index} className="relative group">
@@ -161,7 +179,7 @@ export function ProductForm({ initialData, categories, onSubmit, onCancel }: Pro
                       <button
                         type="button"
                         onClick={() => removeImage(index)}
-                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -170,7 +188,8 @@ export function ProductForm({ initialData, categories, onSubmit, onCancel }: Pro
                 </div>
               )}
 
-              <div className="flex items-center justify-center w-full">
+              {uploadedImages.length < 1 && (
+                <div className="flex items-center justify-center w-full">
                 <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     {uploading ? (
@@ -195,37 +214,38 @@ export function ProductForm({ initialData, categories, onSubmit, onCancel }: Pro
                   />
                 </label>
               </div>
+              )}
             </div>
+          </div>
+          <div id="details-container" className="mt-8">
+            <div className='flex gap-5'>
+              <label>Caractéristiques du produit</label>
+              <Button type="button" onClick={() => appendDetail(
+                {
+                  name: {en: "", fr: ""},
+                  values: []
+                }
+                )} className='mx-auto'
+                icon={Plus}
+              >Ajouter</Button>
+            </div>
+            <div id="details-list" className='p-2 '>
+              {detailsFields.map((_detail, idDetail) => (
+                <ProductDetailsForm
+                  key={`details-inputs-${idDetail}`}
+                  control={control}
+                  register={register}
+                  index={idDetail}
+                  remove={removeDetail}
+                />
+              ))}
+            </div>
+            
           </div>
         </div>
       </div>
 
-      <div id="details-container" className="mt-8">
-        <div className='flex gap-5'>
-          <label>Caractéristiques du produit</label>
-          <Button type="button" onClick={() => appendDetail(
-            {
-              name: {en: "", fr: ""},
-              values: []
-            }
-            )} className='mx-auto'
-          >
-            <Plus className='w-5 h-5'/>
-          </Button>
-        </div>
-        <div id="details-list" className='p-2 '>
-          {detailsFields.map((_detail, idDetail) => (
-            <ProductDetailsForm
-              key={`details-inputs-${idDetail}`}
-              control={control}
-              register={register}
-              index={idDetail}
-              remove={removeDetail}
-            />
-          ))}
-        </div>
-        
-      </div>
+      
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 

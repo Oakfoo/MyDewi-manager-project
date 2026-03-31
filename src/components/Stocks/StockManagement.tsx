@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Product, Charm, CategoryProduct, CharmCategory, Clasp } from '../../types';
-import { useFirebaseCollection } from '../../hooks/useFirebaseCollection';
+import { Product, Charm, Clasp } from '../../types';
 import { Card, CardContent, CardHeader } from '../UI/Card';
 import { Button } from '../UI/Button';
 import { Modal } from '../UI/Modal';
@@ -14,6 +13,11 @@ import {
   Edit,
   ClipboardPaste 
 } from 'lucide-react';
+import { productService } from '../../services/data/ProductService';
+import { charmService } from '../../services/data/CharmService';
+import { productCategoryService } from '../../services/data/ProductCategoryService';
+import { charmCategoryService } from '../../services/data/CharmCategoryService';
+import { claspService } from '../../services/data/ClaspService';
 
 type StockItem = (Product | Charm | Clasp) & {
   type: 'product' | 'charm' | 'clasp';
@@ -21,11 +25,11 @@ type StockItem = (Product | Charm | Clasp) & {
 };
 
 export function StockManagement() {
-  const { data: products, update: updateProduct } = useFirebaseCollection<Product>('Products', 'name', 'asc');
-  const { data: charms, update: updateCharm } = useFirebaseCollection<Charm>('Charms', 'name', 'asc');
-  const { data: Clasps, update: updateClasp } = useFirebaseCollection<Clasp>('Clasps', 'name', 'asc');
-  const { data: productCategories } = useFirebaseCollection<CategoryProduct>('ProductCategory', 'name', 'asc');
-  const { data: charmCategories } = useFirebaseCollection<CharmCategory>('CharmCategory', 'name', 'asc');
+  const products = productService.getAll();
+  const charms = charmService.getAll();
+  const productCategories = productCategoryService.getAll();
+  const charmCategories = charmCategoryService.getAll();
+  const clasps = claspService.getAll();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'product' | 'charm'>('all');
@@ -45,7 +49,7 @@ export function StockManagement() {
       type: 'charm' as const,
       categoryName: charmCategories.find(cat => cat.id === charm.categoryId)?.name.fr || 'Catégorie inconnue'
     })),
-    ...Clasps.map(clasp => ({
+    ...clasps.map(clasp => ({
       ...clasp,
       type: 'clasp' as const,
       categoryName: "Fermoir"
@@ -70,7 +74,7 @@ export function StockManagement() {
   const stats = {
     totalProducts: products.length,
     totalCharms: charms.length,
-    totalClasps: Clasps.length,
+    totalClasps: clasps.length,
     lowStockItems: stockItems.filter(item => item.stock <= item.minStock && item.stock > 0).length,
     outOfStockItems: stockItems.filter(item => item.stock === 0).length,
   };
@@ -103,20 +107,20 @@ export function StockManagement() {
 // }
 
 // Function to trigger a CSV file download
-function downloadCSV(filename: string, csvContent: string): void {
-  // Create a Blob from the CSV content
-  const blob = new Blob([csvContent], { type: "text/csv" });
+// function downloadCSV(filename: string, csvContent: string): void {
+//   // Create a Blob from the CSV content
+//   const blob = new Blob([csvContent], { type: "text/csv" });
 
-  // Create a temporary link element
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = filename;
+//   // Create a temporary link element
+//   const link = document.createElement("a");
+//   link.href = URL.createObjectURL(blob);
+//   link.download = filename;
 
-  // Append the link to the document, trigger the download, and remove the link
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
+//   // Append the link to the document, trigger the download, and remove the link
+//   document.body.appendChild(link);
+//   link.click();
+//   document.body.removeChild(link);
+// }
 
   const handleExport = async () => {
     // const csvContent = convertToCSV(filteredItems);
@@ -133,19 +137,19 @@ function downloadCSV(filename: string, csvContent: string): void {
     try {
       switch(editingItem.type) {
         default:
-          await updateProduct(editingItem.id!, { 
+          await productService.update(editingItem.id!, { 
             stock: data.stock, 
             minStock: data.minStock 
           });
         break;
         case "charm":
-          await updateCharm(editingItem.id!, { 
+          await charmService.update(editingItem.id!, { 
             stock: data.stock, 
             minStock: data.minStock 
           });
         break;
         case 'clasp':
-          await updateClasp(editingItem.id!, {
+          await claspService.update(editingItem.id!, {
             stock: data.stock,
             minStock: data.minStock
           });
@@ -171,10 +175,10 @@ function downloadCSV(filename: string, csvContent: string): void {
   function ItemCard(_item: StockItem) {
     const stockStatus = getStockStatus(_item);
     return (
-      <Card key={_item.id} className='h-1/4 rounded-xl overflow-hidden border border-black shadow-sm bg-white'>
+      <Card key={_item.id} className='h-1/4 p-0 rounded-xl overflow-hidden bg-white'>
         <div className='flex'>
           {/* Image */}
-          <div className='w-1/3 p-2 border-r-1 border-gray-100 content-center'>
+          <div className='w-1/3 border-1 border-solid border-gray-100 content-center'>
             {_item.type === 'product' && (_item as Product).images.length > 0 ? (
               <img
                 className="h-15 w-15 my-auto"
@@ -236,7 +240,7 @@ function downloadCSV(filename: string, csvContent: string): void {
       {/* Header + Actions */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestion des Stocks</h1>
+          <h1>Gestion des Stocks</h1>
         </div>
         <div className='flex space-x-2'>
           <Button 
@@ -256,11 +260,11 @@ function downloadCSV(filename: string, csvContent: string): void {
       <div className="flex text-xs text-center space-x-2 justify-center">
         {/* Résumé du catalogue */}
         <Card className='p-2 bg-green-300 space-y-2 rounded-2xl gap-2'>
-          <h4 className='uppercase'>
+          <h2 className='uppercase'>
             <span className='text-lg'>
               {stats.totalCharms + stats.totalProducts + stats.totalClasps}
-            </span> Références</h4>
-          <div className='flex gap-2 shadow-lg'>
+            </span> Références</h2>
+          <div className='flex gap-2'>
             <div className='border border-black border-outset p-1 rounded-md'>
               <p className='font-bold text-sm'>{stats.totalProducts}</p>
               <p>Supports</p>
@@ -274,18 +278,16 @@ function downloadCSV(filename: string, csvContent: string): void {
               <p>Fermoirs</p>
             </div>
           </div>
-          
-          
         </Card>
         {/* Stocks faibles */}
-        <Card className='p-2 bg-orange-400 space-evenly rounded-2xl gap-2 shadow-lg'>
+        <Card className='p-2 bg-orange-400 space-evenly rounded-2xl gap-2'>
           <TrendingDown className='w-8 h-8 mx-auto' />
           <p className='font-bold text-sm'>{stats.lowStockItems}</p>
           <p>Stock faible</p>
         </Card>
 
         {/* Ruptures */}
-        <Card className='p-2 bg-red-400 space-evenly rounded-2xl gap-2 shadow-lg'>
+        <Card className='p-2 bg-red-400 space-evenly rounded-2xl gap-2'>
           <AlertTriangle className='w-8 h-8 mx-auto' />
           <p className='font-bold text-sm'>{stats.outOfStockItems}</p>
           <p>Ruptures</p>
@@ -293,7 +295,7 @@ function downloadCSV(filename: string, csvContent: string): void {
       </div>
 
       {/* Filtres + Vue Ordinateur/Tablette */}
-      <Card className='sticky top-2 left-2 right-2 bg-white'>
+      <Card className='sticky top-2 left-2 right-2 bg-white p-2'>
         <CardHeader>
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">

@@ -10,21 +10,24 @@ interface PromoCodeFormProps {
 }
 
 export function PromoCodeForm({ initialData, onSubmit, onCancel}: PromoCodeFormProps) {
-    const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<Omit<PromoCode, 'id'>>({
+    const { register, handleSubmit, formState: { errors, isSubmitting }, watch } = useForm<Omit<PromoCode, 'id'>>({
         defaultValues: initialData ? {
             label: initialData.label,
             deliveryFree: initialData.deliveryFree,
             reduction: initialData.reduction,
+            pourcentage: initialData.pourcentage,
             isActive: initialData.isActive || true
-        } : undefined
+        } : {
+            pourcentage: true,
+        }
     });
 
     const handleFormSubmit = async (data: PromoCode) => {
         const formattedData = {
           ...data,
           reduction: Number(data.reduction),
-          createdAt: initialData?.createdAt || new Date(),
-          updatedAt: new Date(),
+          createdAt: initialData?.createdAt || new Date().getTime(),
+          updatedAt: new Date().getTime(),
         };
         await onSubmit(formattedData);
     };
@@ -60,11 +63,19 @@ export function PromoCodeForm({ initialData, onSubmit, onCancel}: PromoCodeFormP
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                     Réduction appliquée
                 </label>
-                <input
-                    type="number"
-                    {...register('reduction')}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+                <div className="flex justify-items items-center">
+                    <input
+                        type="number"
+                        {...register('reduction')}
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    {watch("pourcentage") === true && (
+                        <label className="ml-3">%</label>
+                    )}
+                </div>
+                
+                <label htmlFor="">en pourcentage </label>
+                <input type="checkbox" {... register("pourcentage") }/>
             </div>
             <div className="grid grid-cols-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">

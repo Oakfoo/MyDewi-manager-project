@@ -12,6 +12,7 @@ export function CharmCategoryForm({ initialData, onSubmit, onCancel }: CharmCate
   const { register, handleSubmit, formState: { errors, isSubmitting }, watch } = useForm<Omit<CharmCategory, 'id'>>({
     defaultValues: initialData ? {
       name: initialData.name,
+      displayOrder: initialData.displayOrder,
       isActive: initialData.isActive
     } : {
       isActive: true
@@ -21,8 +22,8 @@ export function CharmCategoryForm({ initialData, onSubmit, onCancel }: CharmCate
   const handleFormSubmit = async (data: Omit<CharmCategory, 'id'>) => {
     const formattedData = {
       ...data,
-      createdAt: initialData?.createdAt || new Date(),
-      updatedAt: new Date(),
+      createdAt: initialData?.createdAt || new Date().getTime(),
+      updatedAt: new Date().getTime(),
     };
     await onSubmit(formattedData);
   };
@@ -57,6 +58,21 @@ export function CharmCategoryForm({ initialData, onSubmit, onCancel }: CharmCate
             <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
           )}
         </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Ordre d'affichage *
+        </label>
+        <input
+          type="number"
+          min="1"
+          {...register('displayOrder', { valueAsNumber: true, required: "L'ordre d'affichage est requis" })}
+          className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+        {errors.name && (
+          <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+        )}
       </div>
 
       <div className="flex items-center">
