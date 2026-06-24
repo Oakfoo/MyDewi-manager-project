@@ -8,7 +8,6 @@ import { Plus, Edit, Trash2, Mail, Phone, Search } from 'lucide-react';
 import { customerService } from '../../services/data/CustomerService';
 
 export function CustomerList() {
-  // const { data: customers, loading, create, update, remove } = useFirebaseCollection<Customer>('Customers', 'email', 'asc');
   const customers = customerService.getAll();
   const [loading, setLoading] = useState<boolean>(customerService.getLoading());
   const [isModalOpen, setIsModalOpen] = useState(false);

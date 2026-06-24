@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
-import { CategoryProduct, EventPromotion } from '../../types';
+import { EventPromotion } from '../../types';
 import { Button } from '../UI/Button';
-import { useFirebaseCollection } from '../../hooks/useFirebaseCollection';
+import { productCategoryService } from '../../services/data/ProductCategoryService';
 
 interface GlobalPromotionFormProps {
   initialData?: EventPromotion | null;
@@ -26,7 +26,7 @@ export function EventPromotionForm({ initialData, onSubmit, onCancel }: GlobalPr
       updatedAt: initialData.updatedAt
     } : {}
   });
-  const { data: categories } = useFirebaseCollection<CategoryProduct>('ProductCategory', 'name', 'asc');
+  const categories = productCategoryService.getAll();
     
   const handleFormSubmit = async (data: Omit<EventPromotion, 'id'>) => {
     const formattedData = {
