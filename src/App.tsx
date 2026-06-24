@@ -17,6 +17,7 @@ import { ClaspList } from './components/Clasps/ClaspList';
 import { PromotionPage } from './components/Promotions/promotionsPage';
 import { ScheduleList } from './components/Schedule/ScheduleList';
 import { MatterList } from './components/Matters/MatterList';
+import { CompositionList } from './components/Compositions/CompositionList';
 
 function App() {
   return (
@@ -27,7 +28,7 @@ function App() {
             <ProtectedRoute>
               <Routes>
                 <Route path="/" element={<Layout />}>
-                  <Route index element={<OrderList />} />
+                  <Route index element={<HomePage />} />
                   <Route path="/customers" element={<CustomerList />} />
                   <Route path="/orders" element={<OrderList />} />
                   <Route path="/agenda" element={<ScheduleList />} />
@@ -36,6 +37,7 @@ function App() {
                   <Route path="/products" element={<ProductList />} />
                   <Route path="/clasps" element={<ClaspList />} />
                   <Route path="/charms" element={<CharmList />} />
+                  <Route path="/compositions" element={<CompositionList />} />
                   <Route path="/product-categories" element={<ProductCategoryList />} />
                   <Route path="/charm-categories" element={<CharmCategoryList />} />
                   <Route path="/matters" element={<MatterList />} />
