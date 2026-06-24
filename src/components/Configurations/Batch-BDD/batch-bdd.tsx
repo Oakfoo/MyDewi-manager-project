@@ -75,7 +75,7 @@ export const BatchBDD = () => {
             */}
             <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-2 gap-4">
                 {/* Formulaire ajout de champ à une collection */}
-                <Card>
+                <Card className="p-2">
                     <CardHeader>
                         <h3>Ajouter un champ à une collection</h3>
                     </CardHeader>
@@ -111,18 +111,49 @@ export const BatchBDD = () => {
                         </form>
                     </CardContent>
                 </Card>
-                <Card className="col-span-1">
+                <Card className="p-2">
                     <CardHeader>
                         <h3>Modifier un champ à une collection</h3>
                     </CardHeader>
+                    <CardContent>
+                        <form>
+                            <div className="border-b border-black">
+                                <label htmlFor="collectionName">Nom de la collection :</label>
+                                <input id="collectionName" type="text" value={collectionName} onChange={(e) => setCollectionName(e.target.value)} />
+                            </div>
+                            <div className="border-b border-black">
+                                <label htmlFor="fieldName">Nom du champ à ajouter :</label>
+                                <input id="fieldName" type="text" value={fieldName} onChange={(e) => setFieldName(e.target.value)} />
+                            </div>
+                            
+                            <div className="border-b border-black">
+                                <label htmlFor="selectType">Type de valeur :</label>
+                                <select id="selectType" value={fieldType} onChange={(e) => setFieldType(e.target.value)}>
+                                    <option value="string">Texte</option>
+                                    <option value="number">Nombre</option>
+                                    <option value="boolean">Booléen</option>
+                                    <option value="array">Tableau</option>
+                                    <option value="object">Objet</option>
+                                </select>
+                            </div>
+                            
+                            {(fieldType !== "array" && fieldType !== "object") && (
+                                <div className="border-b border-black">
+                                    <label htmlFor="fieldValue">Valeur à ajouter</label>
+                                    <input id="fieldValue" type="text" value={fieldValue} onChange={(e) => setFieldValue(e.target.value)} />
+                                </div>
+                            )}
+                            <Button type="button" className="mt-1" disabled={isLoading} onClick={handleNewFieldSubmit}>Ajouter</Button>
+                        </form>
+                    </CardContent>
                 </Card>
-                <Card className="col-span-1">
+                <Card className="p-2">
                     <CardHeader>
                         <h3>Supprimer un champ à une collection</h3>
                     </CardHeader>
                     
                 </Card>
-                <Card className="col-span-1">
+                <Card className="p-2">
                     <CardHeader>
                         <h3>Modifier la valeur d'un champ à une collection</h3>
                     </CardHeader>
