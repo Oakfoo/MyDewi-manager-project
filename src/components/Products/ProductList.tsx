@@ -19,12 +19,14 @@ export function ProductList() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [matterFilter, setMatterFilter] = useState('');
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !categoryFilter || product.categoryId === categoryFilter;
-    return matchesSearch && matchesCategory;
+    const matchesMatter = !matterFilter || product.matterId === matterFilter;
+    return matchesSearch && matchesCategory && matchesMatter;
   });
 
   const getCategoryName = (categoryId: string) => {
@@ -80,7 +82,7 @@ export function ProductList() {
         </Button>
       </div>
       {/* Barre d'outils */ }
-      <Card className='sticky top-5 bg-white z-20'>
+      <Card className='sticky top-5 bg-white z-20 p-2'>
         <CardHeader>
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
@@ -93,18 +95,36 @@ export function ProductList() {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Toutes les catégories</option>
-              {categories.map(category => (
-                <option key={category.id} value={category.id}>
-                  {category.name.fr}
-                </option>
-              ))}
-            </select>
+            <div>
+              <p>Catégories</p>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Choisir...</option>
+                {categories.map(category => (
+                  <option key={category.id} value={category.id}>
+                    {category.name.fr}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <p>Matières</p>
+              <select
+                value={matterFilter}
+                onChange={(e) => setMatterFilter(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Choisir...</option>
+                {matters.map(matter => (
+                  <option key={matter.id} value={matter.id}>
+                    {matter.name.fr}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </CardHeader>
       
