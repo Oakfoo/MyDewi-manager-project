@@ -15,7 +15,8 @@ import {
   DollarSign,
   Settings,
   X,
-  GitCommitHorizontalIcon
+  GitCommitHorizontalIcon,
+  Palette
 } from 'lucide-react';
 
 // const navigation = [
@@ -41,10 +42,10 @@ const suiviNavigation = [
 ]
 
 const stockNavigation = [
+  { name: 'Compositions', href: '/compositions', icon: Palette},
   { name: 'Produits', href: '/products', icon: Package },
   { name: 'Breloques', href: '/charms', icon: Sparkles },
   { name: 'Fermoirs', href: '/clasps', icon: GitCommitHorizontalIcon},
-  
 ]
 
 const categoryNavigation = [
