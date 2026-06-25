@@ -117,11 +117,12 @@ export function CompositionForm({ initialData, onSubmit, onCancel, onDelete }: C
     const minAmountCharm = selectedCategory?.properties.minAmountCharm ?? 0;
     const getTotalPrice = () => {
         // Prix du premier produit
-        let total: number = productService.getById(formProducts[0])?.basePrice!;
+        let total: number = productService.getById(formProducts[0])?.basePrice ?? 0;
         // Ajout des prix des charmes
         formCharms.forEach((el) => {
             const charm = charmService.getById(el.charmId);
-            total += (charm?.price!) * el.charmQuantity;
+
+            total += charm ? ((charm?.price!) * el.charmQuantity) : 0;
         })
         return total;
     }
@@ -256,6 +257,17 @@ export function CompositionForm({ initialData, onSubmit, onCancel, onDelete }: C
                     />
                 </div>
             )}
+
+            { 
+                <div className="grid grid-cols-2">
+                    <div className="flex gap-[1rem]">
+                        <label>Montant total: {getTotalPrice()}</label>
+                    </div>
+                    <div className="flex gap-[1rem]">
+
+                    </div>
+                </div>
+            }
 
             {/* Zone d'action */}
             {!anySelectorOpen && (
