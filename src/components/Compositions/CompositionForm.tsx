@@ -127,7 +127,7 @@ export function CompositionForm({ initialData, onSubmit, onCancel, onDelete }: C
         return total;
     }
 
-    const onFormSubmit = (data: Omit<Composition, "id">) => {
+    const onFormSubmit = async (data: Omit<Composition, "id">) => {
         const totalPrice = getTotalPrice();
 
         const payload: Omit<Composition, "id"> = {
@@ -154,7 +154,7 @@ export function CompositionForm({ initialData, onSubmit, onCancel, onDelete }: C
         } else {
             payload.clasp = formClasp;
         }
-        onSubmit(payload);
+        await onSubmit(payload);
     };
 
     return (
@@ -283,7 +283,7 @@ export function CompositionForm({ initialData, onSubmit, onCancel, onDelete }: C
                     {initialData && <Button variant="danger" onClick={() => onDelete(initialData.id!)}>
                         <Trash className="w-4 h-4"/>
                     </Button>}
-                    <Button variant="secondary" onClick={() => onCancel()}>
+                    <Button variant="secondary" onClick={() => onCancel}>
                         Annuler
                     </Button>
                     <Button type="submit" disabled={isSubmitting}>
