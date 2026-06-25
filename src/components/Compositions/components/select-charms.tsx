@@ -6,13 +6,13 @@ import { CheckCircle, Minus, Plus } from "lucide-react";
 interface CharmSelectorProps {
     isOpen: boolean;
     list: Charm[];
-    selectedCharms: CharmSelection[];
+    validatedCharms: CharmSelection[];
     minAmount: number;
-    onSelect: (charms: CharmSelection[]) => void;
+    onValidate: (charms: CharmSelection[]) => void;
 }
 
-export function CharmSelector({ isOpen, list, selectedCharms, minAmount, onSelect }: CharmSelectorProps) {
-    const [localSelection, setLocalSelection] = useState<CharmSelection[]>(selectedCharms);
+export function CharmSelector({ isOpen, list, validatedCharms, minAmount, onValidate }: CharmSelectorProps) {
+    const [localSelection, setLocalSelection] = useState<CharmSelection[]>(validatedCharms);
     const activeCharms = list.filter((c) => c.isActive);
 
     function getQuantity(charmId: string): number {
@@ -38,7 +38,6 @@ export function CharmSelector({ isOpen, list, selectedCharms, minAmount, onSelec
         }
 
         setLocalSelection(updated);
-        onSelect(updated);
     }
 
     function toggleSelection(charmId: string) {
@@ -47,6 +46,10 @@ export function CharmSelector({ isOpen, list, selectedCharms, minAmount, onSelec
         } else {
             updateQuantity(charmId, 1);
         }
+    }
+
+    function handleValidate() {
+        onValidate(localSelection);
     }
 
     return (
@@ -115,7 +118,47 @@ export function CharmSelector({ isOpen, list, selectedCharms, minAmount, onSelec
                             );
                         })}
                     </div>
+                    <div className="flex justify-end">
+                        <button
+                            type="button"
+                            onClick={handleValidate}
+                            disabled={localSelection.length === 0}
+                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Valider la sélection
+                        </button>
+                    </div>
                 </div>
+            )}
+
+            {/* Liste validée */}
+            {!isOpen && validatedCharms.length > 0 && (
+                <div className="flex items-center gap-3 overflow-x-auto py-2">
+                    {validatedCharms.map((sel) => {
+                        const charm = list.find((c) => c.id === sel.charmId);
+                        if (!charm) return null;
+                        return (
+                            <Card key={sel.charmId} className="min-w-32 max-w-32 h-32 relative">
+                                <CardHeader className="relative">
+                                    <img
+                                        src={charm.image}
+                                        title={charm.name}
+                                        className="h-full w-full object-cover z-1"
+                                    />
+                                </CardHeader>
+                                <CardContent className="absolute bg-white bottom-0 text-xs text-nowrap z-5 w-full">
+                                    <div className="flex items-center justify-between">
+                                        <span className="truncate">{charm.name}</span>
+                                        <span className="font-semibold ml-1">x{sel.charmQuantity}</span>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        );
+                    })}
+                </div>
+            )}
+            {!isOpen && validatedCharms.length === 0 && (
+                <p className="text-gray-500 text-sm py-2">Aucun charm choisi.</p>
             )}
         </div>
     );

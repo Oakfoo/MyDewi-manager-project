@@ -10,7 +10,8 @@ interface ProductSelectorProps {
     selectedCategoryId: string;
     selectedMatterId: string;
     canBeMixed: boolean;
-    setProducts: (data: ProductResponse) => void;
+    validatedProducts: string[];
+    onValidate: (data: ProductResponse) => void;
 }
 
 export function ProductSelector({
@@ -19,7 +20,8 @@ export function ProductSelector({
     selectedCategoryId,
     selectedMatterId,
     canBeMixed,
-    setProducts,
+    validatedProducts,
+    onValidate,
 }: ProductSelectorProps) {
     const [selectedProduct, setSelectedProduct] = useState<string | undefined>(undefined);
     const [secondProduct, setSecondProduct] = useState<string | undefined>(undefined);
@@ -42,22 +44,21 @@ export function ProductSelector({
                     setSelectedProduct(id);
                 }
             }
-            setProducts({
-                prod1: selectedProduct!,
-                prod2: secondProduct ? secondProduct : undefined,
-                mixed: isProductMixed,
-            });
         } else {
             if (selectedProduct !== id) {
                 setSelectedProduct(id);
             } else {
                 setSelectedProduct(undefined);
             }
-            setProducts({
-                prod1: selectedProduct!,
-                mixed: isProductMixed,
-            });
         }
+    }
+
+    function handleValidate() {
+        onValidate({
+            prod1: selectedProduct!,
+            prod2: secondProduct ? secondProduct : undefined,
+            mixed: isProductMixed,
+        });
     }
 
     return (
@@ -107,6 +108,44 @@ export function ProductSelector({
                             </Card>
                         ))}
                     </div>
+                </div>
+            )}
+
+            {/* Liste validée */}
+            {!isOpen && validatedProducts.length > 0 && (
+                <div className="flex items-center gap-3 overflow-x-auto py-2">
+                    {validatedProducts.map((id) => {
+                        const prod = list.find((p) => p.id === id);
+                        if (!prod) return null;
+                        return (
+                            <Card key={id} className="min-w-32 max-w-32 h-32 relative">
+                                <CardHeader className="relative">
+                                    <img
+                                        src={prod.images[0]}
+                                        title={prod.name}
+                                        className="h-full w-full object-cover z-1"
+                                    />
+                                </CardHeader>
+                                <CardContent className="absolute bg-white bottom-0 text-xs text-nowrap z-5 w-full">
+                                    {prod.name}
+                                </CardContent>
+                            </Card>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* Bouton Valider interne au sélecteur */}
+            {isOpen && (
+                <div className="flex justify-end">
+                    <button
+                        type="button"
+                        onClick={handleValidate}
+                        disabled={!selectedProduct}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Valider la sélection
+                    </button>
                 </div>
             )}
         </div>

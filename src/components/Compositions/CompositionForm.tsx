@@ -9,7 +9,6 @@ import { productService } from "../../services/data/ProductService";
 import { Button } from "../UI/Button";
 import { TypeSelector } from "./components/select-type";
 import { ProductSelector } from "./components/select-product";
-import { ListSelectedProducts } from "./components/list-selected-products";
 import { ClaspSelector } from "./components/select-clasp";
 import { CharmSelector } from "./components/select-charms";
 import { Check, X } from "lucide-react";
@@ -92,18 +91,24 @@ export function CompositionForm({ initialData, onSubmit, onCancel }: Composition
         setFormCharms([]);
     }
 
-    function handleProductsChange(data: ProductResponse) {
+    function handleProductsValidate(data: ProductResponse) {
         const newProducts = data.mixed ? [data.prod1, data.prod2!].filter(Boolean) : [data.prod1].filter(Boolean);
         setFormProducts(newProducts);
         setFormMixed(data.mixed);
+        setProductSelectorOpen(false);
+        setAnySelectorOpen(false);
     }
 
-    function handleClaspChange(claspId: string | undefined) {
+    function handleClaspValidate(claspId: string | undefined) {
         setFormClasp(claspId);
+        setClaspSelectorOpen(false);
+        setAnySelectorOpen(false);
     }
 
-    function handleCharmsChange(charms: typeof formCharms) {
+    function handleCharmsValidate(charms: typeof formCharms) {
         setFormCharms(charms);
+        setCharmSelectorOpen(false);
+        setAnySelectorOpen(false);
     }
 
     const useClasp = selectedCategory?.properties.useClasp ?? false;
@@ -160,20 +165,6 @@ export function CompositionForm({ initialData, onSubmit, onCancel }: Composition
             {selectedCategoryId && selectedMatterId && (
                 <div className="border-b-2 border-gray-300">
                     <div className="flex items-center justify-center gap-2">
-                        {isProductSelectorOpen && (
-                            <Button
-                                type="button"
-                                variant="success"
-                                className="text-white"
-                                onClick={() => {
-                                    setProductSelectorOpen(false);
-                                    setAnySelectorOpen(false);
-                                }}
-                            >
-                                <Check />
-                                Valider
-                            </Button>
-                        )}
                         <h3 className="w-full">Base du produit</h3>
                         <Button
                             type="button"
@@ -187,14 +178,14 @@ export function CompositionForm({ initialData, onSubmit, onCancel }: Composition
                             {isProductSelectorOpen ? <X /> : "Modifier"}
                         </Button>
                     </div>
-                    <ListSelectedProducts isSelectorOpened={isProductSelectorOpen} products={formProducts} />
                     <ProductSelector
                         isOpen={isProductSelectorOpen}
                         list={products}
                         selectedCategoryId={selectedCategoryId}
                         selectedMatterId={selectedMatterId}
                         canBeMixed={selectedCategory?.properties.canBeMixed ?? false}
-                        setProducts={handleProductsChange}
+                        validatedProducts={formProducts}
+                        onValidate={handleProductsValidate}
                     />
                 </div>
             )}
@@ -203,20 +194,6 @@ export function CompositionForm({ initialData, onSubmit, onCancel }: Composition
             {useClasp && selectedMatterId && (
                 <div className="border-b-2 border-gray-300">
                     <div className="flex items-center justify-center gap-2">
-                        {isClaspSelectorOpen && (
-                            <Button
-                                type="button"
-                                variant="success"
-                                className="text-white"
-                                onClick={() => {
-                                    setClaspSelectorOpen(false);
-                                    setAnySelectorOpen(false);
-                                }}
-                            >
-                                <Check />
-                                Valider
-                            </Button>
-                        )}
                         <h3 className="w-full">Fermoir</h3>
                         <Button
                             type="button"
@@ -233,8 +210,8 @@ export function CompositionForm({ initialData, onSubmit, onCancel }: Composition
                     <ClaspSelector
                         isOpen={isClaspSelectorOpen}
                         list={clasps.filter((c) => c.matterId === selectedMatterId)}
-                        selectedClasp={formClasp}
-                        onSelect={handleClaspChange}
+                        validatedClasp={formClasp}
+                        onValidate={handleClaspValidate}
                     />
                 </div>
             )}
@@ -243,20 +220,6 @@ export function CompositionForm({ initialData, onSubmit, onCancel }: Composition
             {useCharms && selectedMatterId && (
                 <div className="border-b-2 border-gray-300">
                     <div className="flex items-center justify-center gap-2">
-                        {isCharmSelectorOpen && (
-                            <Button
-                                type="button"
-                                variant="success"
-                                className="text-white"
-                                onClick={() => {
-                                    setCharmSelectorOpen(false);
-                                    setAnySelectorOpen(false);
-                                }}
-                            >
-                                <Check />
-                                Valider
-                            </Button>
-                        )}
                         <h3 className="w-full">Charms</h3>
                         <Button
                             type="button"
@@ -273,9 +236,9 @@ export function CompositionForm({ initialData, onSubmit, onCancel }: Composition
                     <CharmSelector
                         isOpen={isCharmSelectorOpen}
                         list={charms.filter((c) => c.matterId === selectedMatterId)}
-                        selectedCharms={formCharms}
+                        validatedCharms={formCharms}
                         minAmount={minAmountCharm}
-                        onSelect={handleCharmsChange}
+                        onValidate={handleCharmsValidate}
                     />
                 </div>
             )}
