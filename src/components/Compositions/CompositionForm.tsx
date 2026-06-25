@@ -40,7 +40,7 @@ export function CompositionForm({ initialData, onSubmit, onCancel, onDelete }: C
                   categoryId: initialData.categoryId,
                   matterId: initialData.matterId,
                   mixedProducts: initialData.mixedProducts,
-                  clasp: initialData.clasp,
+                  clasp: initialData.clasp ?? '',
                   selectedCharms: initialData.selectedCharms,
                   totalPrice: initialData.totalPrice,
                   createdAt: initialData.createdAt,
@@ -135,17 +135,25 @@ export function CompositionForm({ initialData, onSubmit, onCancel, onDelete }: C
             categoryId: selectedCategoryId,
             matterId: selectedMatterId,
             products: formProducts,
-            clasp: useClasp ? formClasp : undefined,
+            
             mixedProducts: formMixed,
             selectedCharms: useCharms ? formCharms : [],
             totalPrice,
             updatedAt: Date.now(),
         };
 
-        if(!useClasp && payload.clasp) {
-            delete (payload.clasp)
+        // if(!useClasp && "clasp" in payload) {
+        //     delete payload["clasp"];
+        // }
+        // if(useClasp) {
+        //     payload.clasp = formClasp;
+        // }
+        if(!useClasp) {
+            if("clasp" in payload) delete payload["clasp"];
+            
+        } else {
+            payload.clasp = formClasp;
         }
-
         onSubmit(payload);
     };
 
