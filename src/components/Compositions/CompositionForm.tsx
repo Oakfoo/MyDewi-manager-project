@@ -115,24 +115,34 @@ export function CompositionForm({ initialData, onSubmit, onCancel, onDelete }: C
     const useClasp = selectedCategory?.properties.useClasp ?? false;
     const useCharms = selectedCategory?.properties.useCharms ?? false;
     const minAmountCharm = selectedCategory?.properties.minAmountCharm ?? 0;
+    const getTotalPrice = () => {
+        // Prix du premier produit
+        let total: number = productService.getById(formProducts[0])?.basePrice!;
+        // Ajout des prix des charmes
+        formCharms.forEach((el) => {
+            const charm = charmService.getById(el.charmId);
+            total += (charm?.price!) * el.charmQuantity;
+        })
+        return total;
+    }
 
     const onFormSubmit = (data: Omit<Composition, "id">) => {
-        const firstProduct = productService.getById(formProducts[0]);
-        const totalPrice = firstProduct?.basePrice ?? 0;
+        const totalPrice = getTotalPrice();
 
         const payload: Omit<Composition, "id"> = {
             ...data,
             categoryId: selectedCategoryId,
             matterId: selectedMatterId,
             products: formProducts,
+            clasp: useClasp ? formClasp : undefined,
             mixedProducts: formMixed,
             selectedCharms: useCharms ? formCharms : [],
             totalPrice,
             updatedAt: Date.now(),
         };
 
-        if(useClasp) {
-            payload.clasp = formClasp;
+        if(!useClasp && payload.clasp) {
+            delete (payload.clasp)
         }
 
         onSubmit(payload);
