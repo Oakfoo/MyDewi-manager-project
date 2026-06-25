@@ -191,7 +191,7 @@ export interface Composition {
   categoryId: string;
   matterId: string;
   mixedProducts: boolean;
-  clasp?: Clasp;
+  clasp?: string;
   selectedCharms: CharmSelection[];
   totalPrice: number;
   isActive: boolean;
