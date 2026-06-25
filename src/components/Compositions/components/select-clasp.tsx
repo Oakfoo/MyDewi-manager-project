@@ -27,7 +27,7 @@ export function ClaspSelector({ isOpen, list, validatedClasp, onValidate }: Clas
     }
 
     return (
-        <div className={`space-y-5 transition-all duration-200 ${isOpen ? "h-full" : "h-0"}`}>
+        <div className={`space-y-5 transition-all duration-200`}>
             {isOpen && (
                 <div>
                     {activeClasps.length === 0 && (
@@ -80,18 +80,17 @@ export function ClaspSelector({ isOpen, list, validatedClasp, onValidate }: Clas
                         const clasp = list.find((c) => c.id === validatedClasp);
                         if (!clasp) return null;
                         return (
-                            <Card key={clasp.id} className="min-w-32 max-w-32 h-32 relative">
-                                <CardHeader className="relative">
+                            <ul key={clasp.id} className="w-full">
+                                <li className="p-1 flex items-center">
                                     <img
                                         src={clasp.image}
                                         title={clasp.name}
-                                        className="h-full w-full object-cover z-1"
+                                        className="h-8 w-8 object-cover z-1"
                                     />
-                                </CardHeader>
-                                <CardContent className="absolute bg-white bottom-0 text-xs text-nowrap z-5 w-full">
-                                    {clasp.name}
-                                </CardContent>
-                            </Card>
+                                    <p>{clasp.name}</p>
+                                </li>
+                                
+                            </ul>
                         );
                     })()}
                 </div>

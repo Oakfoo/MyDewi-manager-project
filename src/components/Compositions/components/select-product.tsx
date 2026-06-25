@@ -62,7 +62,7 @@ export function ProductSelector({
     }
 
     return (
-        <div className={`space-y-5 transition-all duration-200 ${isOpen ? "h-full" : "h-0"}`}>
+        <div className={`space-y-5 transition-all duration-200`}>
             {isOpen && (
                 <div>
                     {/* Mixable */}
@@ -114,24 +114,23 @@ export function ProductSelector({
             {/* Liste validée */}
             {!isOpen && validatedProducts.length > 0 && (
                 <div className="flex items-center gap-3 overflow-x-auto py-2">
-                    {validatedProducts.map((id) => {
-                        const prod = list.find((p) => p.id === id);
-                        if (!prod) return null;
-                        return (
-                            <Card key={id} className="min-w-32 max-w-32 h-32 relative">
-                                <CardHeader className="relative">
+                    <ul className="w-full">
+                        {validatedProducts.map((id) => {
+                            const prod = list.find((p) => p.id === id);
+                            if (!prod) return null;
+                            return (
+                                <li className="p-1 flex items-center">
                                     <img
-                                        src={prod.images[0]}
-                                        title={prod.name}
-                                        className="h-full w-full object-cover z-1"
+                                            src={prod.images[0]}
+                                            title={prod.name}
+                                            className="h-8 w-8 object-cover z-1"
                                     />
-                                </CardHeader>
-                                <CardContent className="absolute bg-white bottom-0 text-xs text-nowrap z-5 w-full">
-                                    {prod.name}
-                                </CardContent>
-                            </Card>
-                        );
-                    })}
+                                    <p>{prod.name}</p>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                    
                 </div>
             )}
 

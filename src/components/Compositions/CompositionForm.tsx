@@ -135,7 +135,7 @@ export function CompositionForm({ initialData, onSubmit, onCancel }: Composition
     };
 
     return (
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-5">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-8 mb-20">
             {/* Nom */}
             <div className="flex items-center gap-3">
                 <label htmlFor="comp-name" className="font-medium">
@@ -163,7 +163,7 @@ export function CompositionForm({ initialData, onSubmit, onCancel }: Composition
 
             {/* Base du produit */}
             {selectedCategoryId && selectedMatterId && (
-                <div className="border-b-2 border-gray-300">
+                <div className="border-b-2 border-gray-300 pb-4">
                     <div className="flex items-center justify-center gap-2">
                         <h3 className="w-full">Base du produit</h3>
                         <Button
@@ -192,7 +192,7 @@ export function CompositionForm({ initialData, onSubmit, onCancel }: Composition
 
             {/* Fermoir */}
             {useClasp && selectedMatterId && (
-                <div className="border-b-2 border-gray-300">
+                <div className="border-b-2 border-gray-300 pb-4">
                     <div className="flex items-center justify-center gap-2">
                         <h3 className="w-full">Fermoir</h3>
                         <Button
@@ -218,7 +218,7 @@ export function CompositionForm({ initialData, onSubmit, onCancel }: Composition
 
             {/* Charms */}
             {useCharms && selectedMatterId && (
-                <div className="border-b-2 border-gray-300">
+                <div className="border-b-2 border-gray-300 pb-4">
                     <div className="flex items-center justify-center gap-2">
                         <h3 className="w-full">Charms</h3>
                         <Button

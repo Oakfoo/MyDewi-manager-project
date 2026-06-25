@@ -53,7 +53,7 @@ export function CharmSelector({ isOpen, list, validatedCharms, minAmount, onVali
     }
 
     return (
-        <div className={`space-y-5 transition-all duration-200 ${isOpen ? "h-full" : "h-0"}`}>
+        <div className={`space-y-5 transition-all duration-200`}>
             {isOpen && (
                 <div>
                     {minAmount > 0 && (
@@ -133,29 +133,25 @@ export function CharmSelector({ isOpen, list, validatedCharms, minAmount, onVali
 
             {/* Liste validée */}
             {!isOpen && validatedCharms.length > 0 && (
-                <div className="flex items-center gap-3 overflow-x-auto py-2">
+                <ul className="flex items-center gap-3 overflow-x-auto py-2">
                     {validatedCharms.map((sel) => {
                         const charm = list.find((c) => c.id === sel.charmId);
                         if (!charm) return null;
                         return (
-                            <Card key={sel.charmId} className="min-w-32 max-w-32 h-32 relative">
-                                <CardHeader className="relative">
-                                    <img
+                            <li key={sel.charmId} className="min-w-32 max-w-32 h-32 relative">
+                                <img
                                         src={charm.image}
                                         title={charm.name}
-                                        className="h-full w-full object-cover z-1"
+                                        className="h-8 w-8 object-cover z-1"
                                     />
-                                </CardHeader>
-                                <CardContent className="absolute bg-white bottom-0 text-xs text-nowrap z-5 w-full">
-                                    <div className="flex items-center justify-between">
-                                        <span className="truncate">{charm.name}</span>
-                                        <span className="font-semibold ml-1">x{sel.charmQuantity}</span>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                                <div className="flex items-center justify-between">
+                                    <span className="truncate">{charm.name}</span>
+                                    <span className="font-semibold ml-1">x{sel.charmQuantity}</span>
+                                </div>
+                            </li>
                         );
                     })}
-                </div>
+                </ul>
             )}
             {!isOpen && validatedCharms.length === 0 && (
                 <p className="text-gray-500 text-sm py-2">Aucun charm choisi.</p>

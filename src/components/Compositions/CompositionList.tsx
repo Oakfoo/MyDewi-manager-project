@@ -30,7 +30,9 @@ export function CompositionList() {
 
     const getTotalCharmsAmount = (selectedCharms: CharmSelection[]) => {
         let total = 0;
-        selectedCharms.map((el) => total + el.charmQuantity);
+        selectedCharms.map((el) => {
+            total += el.charmQuantity;
+        });
         return total;
     }
 
