@@ -188,14 +188,12 @@ export interface Composition {
   id?: string;
   name: string;
   products: string[];
+  categoryId: string;
+  matterId: string;
   mixedProducts: boolean;
   clasp?: Clasp;
   selectedCharms: CharmSelection[];
-  detailsSelection: ProductDetailSelection[];
   totalPrice: number;
-  appliedPromotion?: EventPromotion;
-  productDiscount?: number;
-  originalProductPrice?: number;
   isActive: boolean;
   createdAt: number;
   updatedAt: number;
