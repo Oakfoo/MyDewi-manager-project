@@ -23,7 +23,7 @@ export function TypeSelector({
                     id="comp-categories"
                     value={selectedCategoryId}
                     onChange={(ev) => onChange(ev.target.value, selectedMatterId)}
-                    className="border-black md:border-r-2"
+                    className="border-black border-b border-r-2 rounded-md"
                 >
                     <option value="">Choisir...</option>
                     {categories.map((cat) => (
@@ -46,7 +46,7 @@ export function TypeSelector({
                     id="comp-matters"
                     value={selectedMatterId}
                     onChange={(ev) => onChange(selectedCategoryId, ev.target.value)}
-                    className="border-black md:border-r-2"
+                    className="border-black border-b border-r-2 rounded-md"
                 >
                     <option value="">Choisir...</option>
                     {matters.map((mat) => (

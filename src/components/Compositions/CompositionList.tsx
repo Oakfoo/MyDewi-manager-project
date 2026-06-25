@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Plus, Search } from "lucide-react";
 import { Button } from "../UI/Button";
 import { Modal } from "../UI/Modal";
-import { Composition } from "../../types";
+import { CharmSelection, Composition } from "../../types";
 import { CompositionForm } from "./CompositionForm";
 import { compositionService } from "../../services/data/CompositionService";
 import { productCategoryService } from "../../services/data/ProductCategoryService";
@@ -27,6 +27,12 @@ export function CompositionList() {
         const matter = matters.find((mat) => mat.id === matterId);
         return matter?.name.fr || "Matière inconnue";
     };
+
+    const getTotalCharmsAmount = (selectedCharms: CharmSelection[]) => {
+        let total = 0;
+        selectedCharms.map((el) => total + el.charmQuantity);
+        return total;
+    }
 
     const handleSubmit = async (data: Omit<Composition, "id">) => {
         setLoading(true);
@@ -54,7 +60,7 @@ export function CompositionList() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 max-w-screen">
             {/* Header */}
             <div className="flex justify-between items-center">
                 <h1>Catalogue des Compositions</h1>
@@ -74,13 +80,13 @@ export function CompositionList() {
                 <p className="text-gray-500 text-center py-8">Aucune composition pour le moment.</p>
             ) : (
                 <div className="overflow-x-auto">
-                    <table className="w-full border-collapse">
+                    <table className="w-full border-collapse text-xs">
                         <thead>
                             <tr className="border-b-2 border-gray-300 bg-gray-50">
-                                <th className="text-left px-4 py-3 font-semibold text-gray-700">Nom</th>
-                                <th className="text-left px-4 py-3 font-semibold text-gray-700">Catégorie / Matière</th>
-                                <th className="text-left px-4 py-3 font-semibold text-gray-700">Nombre de charms</th>
-                                <th className="text-center px-4 py-3 font-semibold text-gray-700">Action</th>
+                                <th className="text-left px-2 py-[1rem] font-semibold text-gray-700">Nom</th>
+                                <th className="text-left px-2 py-[1rem] font-semibold text-gray-700">Catégorie / Matière</th>
+                                <th className="text-left px-2 py-[1rem] font-semibold text-gray-700">Nombre de charms</th>
+                                <th className="text-center px-2 py-[1rem] font-semibold text-gray-700">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -89,19 +95,18 @@ export function CompositionList() {
                                     key={comp.id}
                                     className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
                                 >
-                                    <td className="px-4 py-3 font-medium text-gray-900">{comp.name}</td>
-                                    <td className="px-4 py-3 text-gray-600">
+                                    <td className="px-2 py-[1rem] font-medium text-gray-900">{comp.name}</td>
+                                    <td className="px-2 py-[1rem] text-gray-600">
                                         {getCategoryName(comp.categoryId)} / {getMatterName(comp.matterId)}
                                     </td>
-                                    <td className="px-4 py-3 text-gray-600">{comp.selectedCharms.length}</td>
-                                    <td className="px-4 py-3 text-center">
+                                    <td className="px-2 py-[1rem] text-gray-600">{getTotalCharmsAmount(comp.selectedCharms)}</td>
+                                    <td className="px-2 py-[1rem] text-center">
                                         <Button
                                             variant="secondary"
                                             size="sm"
                                             onClick={() => handleEdit(comp)}
-                                            icon={Search}
                                         >
-                                            Modifier
+                                            <Search className="w-4 h-4"/>
                                         </Button>
                                     </td>
                                 </tr>

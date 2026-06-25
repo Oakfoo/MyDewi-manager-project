@@ -162,6 +162,7 @@ export function CompositionForm({ initialData, onSubmit, onCancel }: Composition
                     <div className="flex items-center justify-center gap-2">
                         {isProductSelectorOpen && (
                             <Button
+                                type="button"
                                 variant="success"
                                 className="text-white"
                                 onClick={() => {
@@ -175,6 +176,7 @@ export function CompositionForm({ initialData, onSubmit, onCancel }: Composition
                         )}
                         <h3 className="w-full">Base du produit</h3>
                         <Button
+                            type="button"
                             variant="danger"
                             className="text-white"
                             onClick={() => {
@@ -203,6 +205,7 @@ export function CompositionForm({ initialData, onSubmit, onCancel }: Composition
                     <div className="flex items-center justify-center gap-2">
                         {isClaspSelectorOpen && (
                             <Button
+                                type="button"
                                 variant="success"
                                 className="text-white"
                                 onClick={() => {
@@ -216,6 +219,7 @@ export function CompositionForm({ initialData, onSubmit, onCancel }: Composition
                         )}
                         <h3 className="w-full">Fermoir</h3>
                         <Button
+                            type="button"
                             variant="danger"
                             className="text-white"
                             onClick={() => {
@@ -241,6 +245,7 @@ export function CompositionForm({ initialData, onSubmit, onCancel }: Composition
                     <div className="flex items-center justify-center gap-2">
                         {isCharmSelectorOpen && (
                             <Button
+                                type="button"
                                 variant="success"
                                 className="text-white"
                                 onClick={() => {
@@ -254,6 +259,7 @@ export function CompositionForm({ initialData, onSubmit, onCancel }: Composition
                         )}
                         <h3 className="w-full">Charms</h3>
                         <Button
+                            type="button"
                             variant="danger"
                             className="text-white"
                             onClick={() => {
