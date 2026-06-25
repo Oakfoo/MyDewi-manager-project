@@ -283,7 +283,7 @@ export function CompositionForm({ initialData, onSubmit, onCancel, onDelete }: C
                     {initialData && <Button variant="danger" onClick={() => onDelete(initialData.id!)}>
                         <Trash className="w-4 h-4"/>
                     </Button>}
-                    <Button variant="secondary" onClick={() => onCancel}>
+                    <Button variant="secondary" onClick={onCancel}>
                         Annuler
                     </Button>
                     <Button type="submit" disabled={isSubmitting}>
