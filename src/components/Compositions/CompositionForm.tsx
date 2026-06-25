@@ -269,7 +269,7 @@ export function CompositionForm({ initialData, onSubmit, onCancel, onDelete }: C
             { 
                 <div className="grid grid-cols-2">
                     <div className="flex gap-[1rem]">
-                        <label>Montant total: {getTotalPrice()}</label>
+                        <label>Montant total: {getTotalPrice()} XPF hors réduction</label>
                     </div>
                     <div className="flex gap-[1rem]">
 
