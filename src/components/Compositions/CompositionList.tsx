@@ -53,6 +53,15 @@ export function CompositionList() {
         isModalOpened(true);
     };
 
+    const handleDelete = async (id: string) => {
+        if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
+          setLoading(true);
+          isModalOpened(false);
+          await compositionService.delete(id);
+          setLoading(false);
+        }
+    };
+
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -134,6 +143,7 @@ export function CompositionList() {
                         isModalOpened(false);
                         setEditingComposition(null);
                     }}
+                    onDelete={async (data) => handleDelete(data)}
                 />
             </Modal>
         </div>

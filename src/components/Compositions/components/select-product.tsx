@@ -119,7 +119,7 @@ export function ProductSelector({
                             const prod = list.find((p) => p.id === id);
                             if (!prod) return null;
                             return (
-                                <li className="p-1 flex items-center">
+                                <li key={id} className="p-1 flex items-center">
                                     <img
                                             src={prod.images[0]}
                                             title={prod.name}

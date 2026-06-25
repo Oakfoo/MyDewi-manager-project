@@ -11,12 +11,13 @@ import { TypeSelector } from "./components/select-type";
 import { ProductSelector } from "./components/select-product";
 import { ClaspSelector } from "./components/select-clasp";
 import { CharmSelector } from "./components/select-charms";
-import { Check, X } from "lucide-react";
+import { Trash, X } from "lucide-react";
 
 interface CompositionFormProps {
     initialData: Composition | null;
     onSubmit: (data: Omit<Composition, "id">) => Promise<void>;
     onCancel: () => void;
+    onDelete: (id: string) => void;
 }
 
 export interface ProductResponse {
@@ -25,7 +26,7 @@ export interface ProductResponse {
     mixed: boolean;
 }
 
-export function CompositionForm({ initialData, onSubmit, onCancel }: CompositionFormProps) {
+export function CompositionForm({ initialData, onSubmit, onCancel, onDelete }: CompositionFormProps) {
     const {
         register,
         handleSubmit,
@@ -125,11 +126,14 @@ export function CompositionForm({ initialData, onSubmit, onCancel }: Composition
             matterId: selectedMatterId,
             products: formProducts,
             mixedProducts: formMixed,
-            clasp: useClasp ? formClasp : undefined,
             selectedCharms: useCharms ? formCharms : [],
             totalPrice,
             updatedAt: Date.now(),
         };
+
+        if(useClasp) {
+            payload.clasp = formClasp;
+        }
 
         onSubmit(payload);
     };
@@ -245,11 +249,14 @@ export function CompositionForm({ initialData, onSubmit, onCancel }: Composition
 
             {/* Zone d'action */}
             {!anySelectorOpen && (
-                <div className="static bottom-0">
-                    <Button variant="secondary" className="float-left" onClick={() => onCancel()}>
+                <div className="static bottom-0 flex items-center justify-center gap-[1rem]">
+                    {initialData && <Button variant="danger" onClick={() => onDelete(initialData.id!)}>
+                        <Trash className="w-4 h-4"/>
+                    </Button>}
+                    <Button variant="secondary" onClick={() => onCancel()}>
                         Annuler
                     </Button>
-                    <Button type="submit" className="float-right" disabled={isSubmitting}>
+                    <Button type="submit" disabled={isSubmitting}>
                         Sauvegarder
                     </Button>
                 </div>
